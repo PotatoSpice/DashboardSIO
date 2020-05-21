@@ -2,19 +2,17 @@ import React from "react";
 
 import "./style.css";
 
-function card() {
+export default function Cardtext({ icon, text, resolte, alt }) {
   return (
     <div className="card">
       <div className="row">
         <p className="icon">
-          <img src="https://img.icons8.com/ios-filled/50/000000/price-tag-euro.png" />
+          <img src={icon} alt={alt} />
         </p>
-        <p className="price">125€</p>
+        <p className="price">{resolte}</p>
       </div>
       <hr />
-      <p className="card-text">Price:</p>
+      <p className="card-text">{text}</p>
     </div>
   );
 }
-
-export default card;
