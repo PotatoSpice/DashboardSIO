@@ -1,6 +1,7 @@
 import React from "react";
 
 import Cardtext from "../../components/card/index";
+import Pie from "../../components/pie/index";
 import "./styles.css";
 
 function dasboard() {
@@ -12,6 +13,11 @@ function dasboard() {
         text={"Price:"}
         resolte={"125€"}
         alt={"Price"}
+      />
+      <Pie
+        labels={`["January", "February", "March"]`}
+        data={`[50, 60, 70]`}
+        alt={"Pie Chart"}
       />
     </div>
   );
