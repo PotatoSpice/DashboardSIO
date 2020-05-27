@@ -2,6 +2,10 @@ var express = require('express');
 var router = express.Router();
 var saft = require('../controllers/SaftController');
 
+router.get('/status', async (req, res)=>{
+    res.status("OK");
+})
+
 router.post('/parsefile', saft.parseFile)
 
 router.get('/allinfo', saft.getJSON)
@@ -20,4 +24,6 @@ router.get('/sales', saft.getSales)
 
 router.get('/product/:id', saft.getProductInfo)
 
+router.get('/purchases', saft.getPurchases)
 
+module.exports = router; 
