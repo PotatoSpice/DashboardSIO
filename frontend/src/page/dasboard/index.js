@@ -3,6 +3,7 @@ import React from "react";
 import Cardtext from "../../components/card/index";
 import Pie from "../../components/pie/index";
 import Header from "../../components/header/index";
+import Bar from "../../components/bar/index";
 
 import "./styles.css";
 
@@ -21,6 +22,11 @@ function dasboard() {
         labels={`["January", "February", "March"]`}
         data={`[50, 60, 70]`}
         alt={"Pie Chart"}
+      />
+      <Bar
+        labels={`["January", "February", "March"]`}
+        data={`[50, 60, 70]`}
+        set={"Users"}
       />
     </div>
   );
