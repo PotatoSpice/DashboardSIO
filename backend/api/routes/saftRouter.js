@@ -6,11 +6,11 @@ router.get('/status', async (req, res)=>{
     res.status("OK");
 })
 
-router.post('/parsefile', saft.parseFile)
+router.get('/company', saft.getCompanyInfo)
 
 router.get('/allinfo', saft.getJSON)
 
-router.get('/dashboard', saft.getInfo)
+router.get('/dashboard', saft.getInfo) //Sales + Purchases
 
 router.get('/customer/:id', saft.getClientInfo)
 
@@ -23,7 +23,5 @@ router.get('/invoices/:id', saft.getInvoice)
 router.get('/sales', saft.getSales)
 
 router.get('/product/:id', saft.getProductInfo)
-
-router.get('/purchases', saft.getPurchases)
 
 module.exports = router; 
