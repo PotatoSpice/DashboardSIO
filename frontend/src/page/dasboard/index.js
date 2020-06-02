@@ -6,6 +6,8 @@ import Pie from "../../components/pie/index";
 import Header from "../../components/header/index";
 import Bar from "../../components/bar/index";
 import TableTest from "../../components/table/index";
+import Line from "../../components/line/index";
+import DoubleLine from "../../components/doubleLine/index";
 
 import "./styles.css";
 
@@ -43,6 +45,22 @@ export default function Dasboard() {
       />
 
       <TableTest />
+
+      <Line
+        labels={`["January", "February", "March"]`}
+        data={`[50, 60, 70]`}
+        name={"User"}
+        alt={"User"}
+      />
+
+      <DoubleLine
+        labels={`["January", "February", "March"]`}
+        data1={`[50, 60, 70]`}
+        name1={"User"}
+        data2={`[25, 80, 5]`}
+        name2={"Test"}
+        alt={"User"}
+      />
     </div>
   );
 }
