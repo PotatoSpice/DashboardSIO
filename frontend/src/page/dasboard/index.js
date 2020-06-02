@@ -5,6 +5,7 @@ import Cardtext from "../../components/card/index";
 import Pie from "../../components/pie/index";
 import Header from "../../components/header/index";
 import Bar from "../../components/bar/index";
+import TableTest from "../../components/table/index";
 
 import "./styles.css";
 
@@ -40,6 +41,8 @@ export default function Dasboard() {
         data={`[50, 60, 70]`}
         set={"Users"}
       />
+
+      <TableTest />
     </div>
   );
 }
