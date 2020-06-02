@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../services/api";
 
 import Cardtext from "../../components/card/index";
 import Pie from "../../components/pie/index";
@@ -7,7 +8,18 @@ import Bar from "../../components/bar/index";
 
 import "./styles.css";
 
-function dasboard() {
+export default function Dasboard() {
+  const [status, setStatus] = useState("");
+
+  async function test() {
+    const response = await api.get("/");
+    console.log(response);
+  }
+
+  useEffect(() => {
+    test();
+  }, [status]);
+
   return (
     <div>
       <Header />
@@ -31,5 +43,3 @@ function dasboard() {
     </div>
   );
 }
-
-export default dasboard;
