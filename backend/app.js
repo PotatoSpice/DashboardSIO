@@ -13,7 +13,7 @@ mongoose.Promise = global.Promise
 
 mongoose
 	.connect(
-		`mongodb://localhost:27017/saft`,
+		`mongodb://localhost:27017/carStore`,
 		{
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
@@ -33,10 +33,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', cors(), apiRouter)
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server started on http://localhost:3000`)
-})
-
 // error handler
 app.use(function(err, req, res, next) {
   if (err.name === 'ValidationError') {
@@ -53,5 +49,9 @@ app.use(function(err, req, res, next) {
     message: err.message
   })
 });
+
+app.listen(3000, () => {
+  console.log(`Server started on http://localhost:3000`)
+})
 
 module.exports = app;

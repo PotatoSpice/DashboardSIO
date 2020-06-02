@@ -18,10 +18,9 @@ router.get('/supplier/:id', saft.getSupplierInfo)
 
 router.get('/invoices', saft.getInvoices)
 
-router.get('/invoices/:id', saft.getInvoice)
-
 router.get('/sales', saft.getSales)
 
 router.get('/product/:id', saft.getProductInfo)
+router.get('/kpi', saft.getValues)
 
 module.exports = router; 
