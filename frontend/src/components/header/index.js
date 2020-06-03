@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import "./styles.css";
 
@@ -15,13 +15,13 @@ function header() {
           <nav>
             <ul>
               <li>
-                <Link className="back-link" to="/test">
+                <Link className="back-link" to="/">
                   Home
                 </Link>
               </li>
               <li>
-                <Link className="back-link" to="/test">
-                  Opçao1
+                <Link className="back-link" to="/client">
+                  Client
                 </Link>
               </li>
               <li>

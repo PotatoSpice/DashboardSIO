@@ -7,4 +7,4 @@ var SaftSchema = new mongoose.Schema({
     SourceDocuments: { type: Object }
 });
 
-module.exports = mongoose.model('Saft', SaftSchema, 'saft');
+module.exports = mongoose.model('Saft', SaftSchema, 'Saft');

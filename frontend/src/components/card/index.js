@@ -2,12 +2,12 @@ import React from "react";
 
 import "./style.css";
 
-export default function Cardtext({ icon, text, resolte, alt }) {
+export default function Cardtext({ icon, text, resolte }) {
   return (
     <div className="card">
       <div className="row">
         <p className="icon">
-          <img src={icon} alt={alt} />
+          <img src={icon} alt={text} />
         </p>
         <p className="price">{resolte}</p>
       </div>
