@@ -62,6 +62,8 @@ export default function Dasboard() {
     setMonthsInvoice(months);
     setMonthTotal(monthTotal);
     setMonthNetTotal(monthNetTotal);
+    console.log(months)
+
   }
 
   useEffect(() => {

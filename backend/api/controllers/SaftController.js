@@ -51,7 +51,7 @@ const getInfo = async (req, res) => {
     let monthNetTotal = [];
 
     for (data in jsonInvoicesMonth){
-        months.push(jsonInvoicesMonth[data]._id);
+        months.push(''+jsonInvoicesMonth[data]._id);
         monthTotal.push(jsonInvoicesMonth[data].MonthTotal);
         monthNetTotal.push(jsonInvoicesMonth[data].MonthNetTotal)
     }
