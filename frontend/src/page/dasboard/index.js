@@ -13,26 +13,85 @@ import "./styles.css";
 
 export default function Dasboard() {
   const [status, setStatus] = useState("");
+  const [year, setYear] = useState(2019);
+  const [TotalEntries, setTotalEntries] = useState("");
+  const [TotalCredit, setTotalCredit] = useState("");
+  const [NumberOfSales, setNumberOfSales] = useState("");
+  const [SalesValue, setSalesValue] = useState("");
+  const [totalCompras, setTotalCompras] = useState("");
+  const [totalVendas, setTotalVendas] = useState("");
 
   async function test() {
     const response = await api.get("/");
     console.log(response);
   }
 
+  async function kpis() {
+    const response = await api.get("/saft/kpi", {
+      FiscalYear: year,
+    });
+
+    const {
+      TotalEntries,
+      TotalCredit,
+      NumberOfSales,
+      SalesValue,
+      totalCompras,
+      totalVendas,
+    } = response;
+
+    setTotalEntries(TotalEntries);
+    setTotalCredit(TotalCredit);
+    setNumberOfSales(NumberOfSales);
+    setSalesValue(SalesValue);
+    setTotalCompras(totalCompras);
+    setTotalVendas(totalVendas);
+  }
+
   useEffect(() => {
     test();
+    kpis();
   }, [status]);
 
   return (
     <div>
       <Header />
       <h1>Dasboard</h1>
-      <Cardtext
-        icon={"https://img.icons8.com/ios-filled/50/000000/price-tag-euro.png"}
-        text={"Price:"}
-        resolte={"125€"}
-        alt={"Price"}
-      />
+      <div className="kpis">
+        <Cardtext
+          icon={"https://img.icons8.com/ios/64/000000/list.png"}
+          text={"Total Entries:"}
+          resolte={TotalEntries}
+        />
+        <Cardtext
+          icon={
+            "https://img.icons8.com/android/24/000000/bank-card-back-side.png"
+          }
+          text={"Total Credit:"}
+          resolte={TotalCredit}
+        />
+        <Cardtext
+          icon={"https://img.icons8.com/wired/64/000000/sales-performance.png"}
+          text={"Number Of Sales:"}
+          resolte={NumberOfSales}
+        />
+        <Cardtext
+          icon={"https://img.icons8.com/wired/64/000000/sales-performance.png"}
+          text={"Sales Value:"}
+          resolte={SalesValue}
+        />
+        <Cardtext
+          icon={"https://img.icons8.com/carbon-copy/100/000000/total-sales.png"}
+          text={"Total Sales:"}
+          resolte={totalVendas}
+        />
+        <Cardtext
+          icon={"https://img.icons8.com/wired/64/000000/shop.png"}
+          text={"Total Compras:"}
+          resolte={totalCompras}
+        />
+      </div>
+
       <Pie
         labels={`["January", "February", "March"]`}
         data={`[50, 60, 70]`}
