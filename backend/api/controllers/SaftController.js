@@ -122,7 +122,7 @@ const getInvoices = async (req, res) => {
 
 //Get expenditure by costumer
 const getSales = async (req, res) => {
-    const salesPerClient = await saft.aggregate([{ $match: { 'doc.AuditFile.Header.FiscalYear': 2017 } },
+    const salesPerClient = await saft.aggregate([{ $match: { 'doc.AuditFile.Header.FiscalYear': req.body.FiscalYear } },
     { $unwind: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice' },
     {
         $group: {
