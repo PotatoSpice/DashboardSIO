@@ -128,15 +128,17 @@ const getClientLocations = async (req, res) => {
     ])
 
     let cities = [];
-    let count = []; 
+    let count = [];
 
-    for (data in clientPerLocation){
+    for (data in clientPerLocation) {
         cities.push(clientPerLocation[data]._id);
         count.push(clientPerLocation[data].locationCount);
     }
 
-    res.json({cities,
-    count})
+    res.json({
+        cities,
+        count
+    })
 
 }
 
@@ -190,18 +192,18 @@ const getSales = async (req, res) => {
 
 }
 
-const getProducts = async (req, res) =>{
-    const productsJson = await saft.aggregate([{ $match: { 'Header.FiscalYear': 2017 }},
+const getProducts = async (req, res) => {
+    const productsJson = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
     { $unwind: '$MasterFiles.Product' },
-        {
-            $project: {
-                'MasterFiles.Product.ProductCode': 1,
-                'MasterFiles.Product.ProductDescription': 1,
-                'MasterFiles.Product.ProductGroup': 1
-            }
+    {
+        $project: {
+            'MasterFiles.Product.ProductCode': 1,
+            'MasterFiles.Product.ProductDescription': 1,
+            'MasterFiles.Product.ProductGroup': 1
         }
-        
-])
+    }
+
+    ])
 
     const stringified = JSON.stringify(productsJson);
     const obj = JSON.parse(stringified);
@@ -211,30 +213,30 @@ const getProducts = async (req, res) =>{
     let ProductDescription
     let ProductGroup
 
-    for (i in productsJson){
+    for (i in productsJson) {
         ProductCode = obj[0].MasterFiles.ProductCode;
-        ProductDescription =  obj[0].MasterFiles.ProductDescription;
-        ProductGroup =  obj[0].MasterFiles.ProductGroup; 
-        products.push({ProductCode, ProductDescription, ProductGroup})
+        ProductDescription = obj[0].MasterFiles.ProductDescription;
+        ProductGroup = obj[0].MasterFiles.ProductGroup;
+        products.push({ ProductCode, ProductDescription, ProductGroup })
     }
 
 }
 
 const getProductSales = async (req, res) => {
     const salesPerProduct = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
-    { $unwind: {"path":'$SourceDocuments.SalesInvoices.Invoice'}},
-    { $unwind: {"path":'$SourceDocuments.SalesInvoices.Invoice.Line'}},
-    { $unwind: {"path":'$SourceDocuments.SalesInvoices.Invoice.Line.ProductCode'}},
+    { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice' } },
+    { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice.Line' } },
+    { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice.Line.ProductCode' } },
     {
         $group: {
             '_id': '$SourceDocuments.SalesInvoices.Invoice.Line.ProductCode',
-            'ProductDesc':{ $addToSet: '$SourceDocuments.SalesInvoices.Invoice.Line.Description'},
-            'ProductTotal': { $sum: '$.SourceDocuments.SalesInvoices.Invoice.Line.CreditAmount' },
+            'ProductDesc': { $addToSet: '$SourceDocuments.SalesInvoices.Invoice.Line.Description' },
+            'ProductTotal': { $sum: '$SourceDocuments.SalesInvoices.Invoice.Line.CreditAmount' },
             'ProductAverage': { $avg: '$SourceDocuments.SalesInvoices.Invoice.Line.CreditAmount' },
             'productCount': { $sum: 1 }
         }
     },
-    {$sort: { 'ProductTotal': -1 }}
+    { $sort: { 'ProductTotal': -1 } }
     ])
 
     let products = [];
@@ -242,7 +244,7 @@ const getProductSales = async (req, res) => {
     let productAverage = [];
     let productCount = [];
 
-    for(i in salesPerProduct){
+    for (i in salesPerProduct) {
         products.push(salesPerProduct[i].ProductDesc);
         productTotal.push(salesPerProduct[i].ProductTotal);
         productAverage.push(salesPerProduct[i].ProductAverage);
@@ -254,6 +256,80 @@ const getProductSales = async (req, res) => {
         productTotal,
         productAverage,
         productCount
+    });
+
+}
+
+const getGroupSales = async (req, res) => {
+    const salesPerProduct = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
+    { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice' } },
+    { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice.Line' } },
+    { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice.Line.ProductCode' } },
+    {
+        $group: {
+            '_id': '$SourceDocuments.SalesInvoices.Invoice.Line.ProductCode',
+            'ProductTotal': { $sum: '$SourceDocuments.SalesInvoices.Invoice.Line.CreditAmount' },
+            'productCount': { $sum: 1 }
+        }
+    }
+    ])
+
+    let products = [];
+    let productTotal = [];
+    let productCount = [];
+
+
+    for (i in salesPerProduct) {
+
+        products.push({ 'ID': salesPerProduct[i]._id });
+        productTotal.push(salesPerProduct[i].ProductTotal);
+        productCount.push(salesPerProduct[i].productCount);
+        console.log(products[i])
+    }
+
+    const groups = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear} },
+    { $unwind: '$MasterFiles.Product' },
+    {
+        $group: {
+            '_id': '$MasterFiles.Product.ProductGroup',
+            'ProductCodes': { $addToSet: '$MasterFiles.Product.ProductCode' }
+        }
+    },
+    { $sort: { '_id': 1 } }
+    ])
+
+    let groupName = [];
+    let groupTotal = [];
+    let groupCount = [];
+    let groupArray = []
+    let pindex;
+
+    for(i in groups){
+        groupTotal[i] = 0;
+        groupCount[i] = 0
+    }
+
+    for(i in groups){
+        groupName.push(groups[i]._id)
+
+        for(j in products){
+            product = products[j].ID;
+            if(groups[i].ProductCodes.includes(product)){
+                pindex = products.findIndex(p => p.ID === product);
+                if(pindex!=1){
+                    groupTotal[i] += productTotal[pindex];
+                    groupCount[i] += productCount[pindex];
+                }
+            }
+        }
+
+    }
+
+
+    res.json({
+        groupName,
+        groupTotal,
+        groupCount
     });
 
 }
@@ -325,5 +401,6 @@ module.exports = {
     getValues,
     getClientLocations,
     getProductSales,
-    getProducts
+    getProducts,
+    getGroupSales
 }

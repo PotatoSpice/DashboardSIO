@@ -24,6 +24,7 @@ router.post('/locations', saft.getClientLocations)
 router.post('/product/:id', saft.getProductInfo)
 router.post('/salesproduct', saft.getProductSales)
 router.post('/productlisting', saft.getProducts) //Just Products
+router.post('/productgroups', saft.getGroupSales) //Values per group
 
 router.post('/kpi', saft.getValues)
 
