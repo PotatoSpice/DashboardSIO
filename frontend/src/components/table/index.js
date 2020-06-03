@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -7,6 +7,8 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+
+import api from "../../services/api";
 // import { Container } from './styles';
 
 const useStyles = makeStyles({
@@ -26,12 +28,29 @@ function createData(
   return { number, date, customer, totalTax, totalWithoutTax, totalWithTax };
 }
 
+/*
 const rows = [
-  createData("1234", "12/5/1800", "eu", 24, 4.0, 4547),
+  createData("1234", "12/5/1800",customer: "eu", 24, 4.0, 4547),
   createData("5678", "12/5/1800", "tu", 37, 4.3, 2365),
-];
+];*/
 
 export default function TableTest() {
+  const [year, setYear] = useState(2017);
+  const [rows, setRows] = useState([]);
+
+  async function invoices() {
+    const response = await api.post("/saft/invoices", {
+      FiscalYear: year,
+    });
+
+    setRows(response.data);
+    console.log(rows);
+  }
+
+  useEffect(() => {
+    invoices();
+  }, []);
+
   const classes = useStyles();
   return (
     <div>
@@ -39,25 +58,25 @@ export default function TableTest() {
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Number</TableCell>
+              <TableCell>Invoice</TableCell>
               <TableCell align="right">Date</TableCell>
               <TableCell align="right">Customer</TableCell>
-              <TableCell align="right">Total Tax</TableCell>
-              <TableCell align="right">Total without tax</TableCell>
-              <TableCell align="right">Total with tax</TableCell>
+              <TableCell align="right">Gross Total</TableCell>
+              <TableCell align="right">Net Total</TableCell>
+              <TableCell align="right">Tax Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((row) => (
-              <TableRow key={row.number}>
+              <TableRow key={row.InvoiceNo}>
                 <TableCell component="th" scope="row">
-                  {row.number}
+                  {row.InvoiceNo}
                 </TableCell>
-                <TableCell align="right">{row.date}</TableCell>
-                <TableCell align="right">{row.customer}</TableCell>
-                <TableCell align="right">{row.totalTax}</TableCell>
-                <TableCell align="right">{row.totalWithoutTax}</TableCell>
-                <TableCell align="right">{row.totalWithTax}</TableCell>
+                <TableCell align="right">{row.InvoiceDate}</TableCell>
+                <TableCell align="right">{row.CustomerID}</TableCell>
+                <TableCell align="right">{row.GrossTotal}</TableCell>
+                <TableCell align="right">{row.NetTotal}</TableCell>
+                <TableCell align="right">{row.TaxTotal}</TableCell>
               </TableRow>
             ))}
           </TableBody>
