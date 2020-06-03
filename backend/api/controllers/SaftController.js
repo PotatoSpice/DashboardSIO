@@ -39,7 +39,7 @@ const getInfo = async (req, res) => {
         $group: {
             '_id': '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.Period',
             'MonthTotal': { $sum: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal' }, //Com Impostos
-            'MonthNetTotal': { $sum: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.NetTotal' } //Sem, Impostos
+            'MonthNetTotal': { $avg: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal' } //Sem, Impostos
         }
     },
     { $sort: { '_id': 1 } }
@@ -50,18 +50,16 @@ const getInfo = async (req, res) => {
     let monthTotal = [];
     let monthNetTotal = [];
 
-    for (data in jsonInvoicesMonth){
-        months.push(jsonInvoicesMonth[data]._id);
+    for (data in jsonInvoicesMonth) {
+        months.push('' + jsonInvoicesMonth[data]._id);
         monthTotal.push(jsonInvoicesMonth[data].MonthTotal);
         monthNetTotal.push(jsonInvoicesMonth[data].MonthNetTotal)
     }
 
-    console.log(jsonInvoicesMonth);
-
     res.json({
-       months,
-       monthTotal,
-       monthNetTotal
+        months,
+        monthTotal,
+        monthNetTotal
     })
 }
 
@@ -84,35 +82,92 @@ const getInvoices = async (req, res) => {
     const invoices = await saft.aggregate([{ $match: { 'doc.AuditFile.Header.FiscalYear': req.body.FiscalYear } },
     {
         $project: {
+            'doc.AuditFile.SourceDocuments.SalesInvoices.NumberOfEntries': 1,
             'doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.InvoiceNo': 1,
             'doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.InvoiceDate': 1,
             'doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.CustomerID': 1,
             'doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal': 1,
             'doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.NetTotal': 1
         }
-    },
-
-
+    }
     ])
-    res.json(invoices)
+
+    const stringified = JSON.stringify(invoices);
+    const obj = JSON.parse(stringified);
+
+    let invoiceInfo = []
+
+    let InvoiceNo;
+    let InvoiceDate;
+    let CustomerID;
+    let GrossTotal;
+    let NetTotal;
+    let TaxTotal;
+    const NumberOfEntries = obj[0].doc.AuditFile.SourceDocuments.SalesInvoices.NumberOfEntries;
+    for (let i = 0; i < NumberOfEntries; i++) {
+        InvoiceNo = obj[0].doc.AuditFile.SourceDocuments.SalesInvoices.Invoice[i].InvoiceNo;
+        InvoiceDate = obj[0].doc.AuditFile.SourceDocuments.SalesInvoices.Invoice[i].InvoiceDate;
+        CustomerID = obj[0].doc.AuditFile.SourceDocuments.SalesInvoices.Invoice[i].CustomerID;
+        GrossTotal = obj[0].doc.AuditFile.SourceDocuments.SalesInvoices.Invoice[i].DocumentTotals.GrossTotal;
+        NetTotal = obj[0].doc.AuditFile.SourceDocuments.SalesInvoices.Invoice[i].DocumentTotals.NetTotal;
+        TaxTotal = GrossTotal - NetTotal;
+        invoiceInfo.push({ InvoiceNo, InvoiceDate, CustomerID, GrossTotal, NetTotal, TaxTotal })
+    }
+
+
+
+
+    res.json(invoiceInfo)
 }
 
 //Get expenditure by costumer
 const getSales = async (req, res) => {
-    const salesPerClient = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
-    { $unwind: '$SourceDocuments.SalesInvoices.Invoice' },
+    const salesPerClient = await saft.aggregate([{ $match: { 'doc.AuditFile.Header.FiscalYear': 2017 } },
+    { $unwind: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice' },
     {
         $group: {
             '_id': '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.CustomerID',
             'ClientTotal': { $sum: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal' },
-            'ClientNetTotal': { $sum: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.NetTotal' },
+            'ClientAverage': { $avg: '$doc.AuditFile.SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal' },
             'clientCount': { $sum: 1 }
         }
     }
     ])
 
+    let clientSales = []
+
+    let clientID;
+    let clientTotal;
+    let clientAverage;
+    let clientCount;
+    let clientTaxID;
+    let clientName;
+
+    /*clientID = salesPerClient[data]._id;
+    console.log(clientID) */
+    const client = await saft.aggregate([
+        { $unwind: '$doc.AuditFile.MasterFiles.Customer' },
+        {
+            $project: {
+                'doc.AuditFile.MasterFiles.Customer.CustomerTaxID': 1,
+                'doc.AuditFile.MasterFiles.Customer.CompanyName': 1
+            }
+        }
+    ])
+
+    const stringified = JSON.stringify(client);
+    const obj = JSON.parse(stringified);
+    for (data in salesPerClient) {
+        clientTaxID = obj[data].doc.AuditFile.MasterFiles.Customer.CustomerTaxID;
+        clientName = obj[data].doc.AuditFile.MasterFiles.Customer.CompanyName;
+        clientTotal = salesPerClient[data].ClientTotal;
+        clientAverage = salesPerClient[data].ClientAverage;
+        clientCount = salesPerClient[data].clientCount;
+        clientSales.push({ clientTaxID, clientName, clientTotal, clientAverage, clientCount })
+    }
+
     res.json(
-        salesPerClient
+        clientSales
     );
 
 }
