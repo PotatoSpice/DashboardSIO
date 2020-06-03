@@ -20,6 +20,10 @@ export default function Dasboard() {
   const [SalesValue, setSalesValue] = useState("");
   const [totalCompras, setTotalCompras] = useState("");
   const [totalVendas, setTotalVendas] = useState("");
+  //invoice
+  const [monthsInvoice, setMonthsInvoice] = useState([]);
+  const [monthTotal, setMonthTotal] = useState([]);
+  const [monthNetTotal, setMonthNetTotal] = useState([]);
 
   async function test() {
     const response = await api.get("/");
@@ -48,9 +52,22 @@ export default function Dasboard() {
     setTotalVendas(totalVendas);
   }
 
+  async function invoices() {
+    const response = await api.post("/saft/dashboard", {
+      FiscalYear: year,
+    });
+
+    const { months, monthTotal, monthNetTotal } = response.data;
+    console.log(months, monthTotal, monthNetTotal);
+    setMonthsInvoice(months);
+    setMonthTotal(monthTotal);
+    setMonthNetTotal(monthNetTotal);
+  }
+
   useEffect(() => {
     test();
     kpis();
+    invoices();
   }, [status]);
 
   return (
@@ -91,7 +108,16 @@ export default function Dasboard() {
           resolte={totalCompras}
         />
       </div>
-
+      <div className="invoices">
+        <DoubleLine
+          labels={monthsInvoice}
+          data1={monthTotal}
+          name1={"Total Invoices"}
+          data2={monthNetTotal}
+          name2={"Total Net Invoices"}
+          alt={"Invoices"}
+        />
+      </div>
       <Pie
         labels={`["January", "February", "March"]`}
         data={`[50, 60, 70]`}
