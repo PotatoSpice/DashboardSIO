@@ -10,7 +10,7 @@ export default function doubleLine({
   data2,
   alt,
 }) {
-  let graft = `https://quickchart.io/chart?c={type:'line',data:{labels:${labels}, datasets:[{label:'${name1}', data: ${data1}, fill:false,borderColor:'blue'},{label:'${name2}', data:${data2}, fill:false,borderColor:'green'}]}}`;
+  let graft = `https://quickchart.io/chart?c={type:'line',data:{labels:[${labels}], datasets:[{label:'${name1}', data: [${data1}], fill:false,borderColor:'blue'},{label:'${name2}', data:[${data2}], fill:false,borderColor:'green'}]}}`;
   return (
     <div>
       <img src={graft} alt={alt} />
