@@ -32,10 +32,6 @@ app.use(cookieParser());
 
 app.use('/api', cors(), apiRouter)
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server started on http://localhost:3000`)
-})
-
 // error handler
 app.use(function(err, req, res, next) {
   if (err.name === 'ValidationError') {
@@ -52,5 +48,9 @@ app.use(function(err, req, res, next) {
     message: err.message
   })
 });
+
+app.listen(3000, () => {
+  console.log(`Server started on http://localhost:3000`)
+})
 
 module.exports = app;
