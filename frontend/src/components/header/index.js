@@ -15,13 +15,13 @@ function header() {
           <nav>
             <ul>
               <li>
-                <Link className="back-link" to="/test">
+                <Link className="back-link" to="/">
                   Home
                 </Link>
               </li>
               <li>
-                <Link className="back-link" to="/test">
-                  Opçao1
+                <Link className="back-link" to="/client">
+                  Client
                 </Link>
               </li>
               <li>

@@ -17,12 +17,12 @@ const useStyles = makeStyles({
   },
 });
 
-export default function TableTest() {
+export default function TableClient() {
   const [year, setYear] = useState(2017);
   const [rows, setRows] = useState([]);
 
   async function invoices() {
-    const response = await api.post("/saft/invoices", {
+    const response = await api.post("/saft/sales", {
       FiscalYear: year,
     });
 
@@ -41,25 +41,23 @@ export default function TableTest() {
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Invoice</TableCell>
-              <TableCell align="right">Date</TableCell>
-              <TableCell align="right">Customer</TableCell>
-              <TableCell align="right">Gross Total</TableCell>
-              <TableCell align="right">Net Total</TableCell>
-              <TableCell align="right">Tax Total</TableCell>
+              <TableCell>Client Tax Id</TableCell>
+              <TableCell align="right">Name</TableCell>
+              <TableCell align="right">Total</TableCell>
+              <TableCell align="right">Average</TableCell>
+              <TableCell align="right">Count</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((row) => (
-              <TableRow key={row.InvoiceNo}>
+              <TableRow key={row.clientTaxID}>
                 <TableCell component="th" scope="row">
-                  {row.InvoiceNo}
+                  {row.clientTaxID}
                 </TableCell>
-                <TableCell align="right">{row.InvoiceDate}</TableCell>
-                <TableCell align="right">{row.CustomerID}</TableCell>
-                <TableCell align="right">{row.GrossTotal}</TableCell>
-                <TableCell align="right">{row.NetTotal}</TableCell>
-                <TableCell align="right">{row.TaxTotal}</TableCell>
+                <TableCell align="right">{row.clientName}</TableCell>
+                <TableCell align="right">{row.clientTotal}</TableCell>
+                <TableCell align="right">{row.clientAverage}</TableCell>
+                <TableCell align="right">{row.clientCount}</TableCell>
               </TableRow>
             ))}
           </TableBody>
