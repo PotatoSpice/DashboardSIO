@@ -26,9 +26,8 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/api", cors(), apiRouter);
+app.use('/api', cors(), apiRouter)
 
 // error handler
 app.use(function (err, req, res, next) {
@@ -50,5 +49,9 @@ app.use(function (err, req, res, next) {
 app.listen(3333, () => {
   console.log(`Server started on http://localhost:3333`);
 });
+
+app.listen(3000, () => {
+  console.log(`Server started on http://localhost:3000`)
+})
 
 module.exports = app;
