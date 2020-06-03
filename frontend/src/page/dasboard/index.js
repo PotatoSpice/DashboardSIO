@@ -114,7 +114,7 @@ export default function Dasboard() {
           data1={monthTotal}
           name1={"Total Invoices"}
           data2={monthNetTotal}
-          name2={"Total Net Invoices"}
+          name2={"Total Average Invoices"}
           alt={"Invoices"}
         />
       </div>
