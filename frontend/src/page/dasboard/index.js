@@ -13,7 +13,7 @@ import "./styles.css";
 
 export default function Dasboard() {
   const [status, setStatus] = useState("");
-  const [year, setYear] = useState(2019);
+  const [year, setYear] = useState(2017);
   const [TotalEntries, setTotalEntries] = useState("");
   const [TotalCredit, setTotalCredit] = useState("");
   const [NumberOfSales, setNumberOfSales] = useState("");
@@ -27,7 +27,7 @@ export default function Dasboard() {
   }
 
   async function kpis() {
-    const response = await api.get("/saft/kpi", {
+    const response = await api.post("/saft/kpi", {
       FiscalYear: year,
     });
 
@@ -38,7 +38,7 @@ export default function Dasboard() {
       SalesValue,
       totalCompras,
       totalVendas,
-    } = response;
+    } = response.data;
 
     setTotalEntries(TotalEntries);
     setTotalCredit(TotalCredit);

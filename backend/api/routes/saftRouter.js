@@ -21,6 +21,6 @@ router.get('/invoices', saft.getInvoices)
 router.get('/sales', saft.getSales)
 
 router.get('/product/:id', saft.getProductInfo)
-router.get('/kpi', saft.getValues)
+router.post('/kpi', saft.getValues)
 
 module.exports = router; 

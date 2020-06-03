@@ -116,7 +116,7 @@ const getSales = async (req, res) => {
 }
 
 const getValues = async (req, res) => {
-    const movimentsInfo = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
+    const movimentsInfo = await saft.aggregate([{ $match: { 'Header.FiscalYear': '2017' } },
     {
         $project: {
             'SourceDocuments.SalesInvoices.NumberOfEntries': 1,
@@ -126,15 +126,17 @@ const getValues = async (req, res) => {
         }
     }
     ])
+
     const stringified = JSON.stringify(movimentsInfo);
     const obj = JSON.parse(stringified);
+
     const TotalEntries = obj[0].GeneralLedgerEntries.NumberOfEntries;
     const TotalCredit = obj[0].GeneralLedgerEntries.TotalCredit;
     const NumberOfSales = obj[0].SourceDocuments.SalesInvoices.NumberOfEntries;
     const SalesValue = obj[0].SourceDocuments.SalesInvoices.TotalCredit;
 
     //Retorna o total de Compras(index 1) e Vendas (index 0)
-    const jsonTotalSalesAndPurchases = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
+    const jsonTotalSalesAndPurchases = await saft.aggregate([{ $match: { 'Header.FiscalYear': '2017' } },
     { $unwind: '$GeneralLedgerEntries.Journal' },
     {
         $group: {
