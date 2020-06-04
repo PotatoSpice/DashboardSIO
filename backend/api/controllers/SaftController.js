@@ -131,7 +131,7 @@ const getClientLocations = async (req, res) => {
     let count = [];
 
     for (data in clientPerLocation) {
-        cities.push(clientPerLocation[data]._id);
+        cities.push(`"${clientPerLocation[data]._id}`);
         count.push(clientPerLocation[data].locationCount);
     }
 
@@ -153,7 +153,8 @@ const getSales = async (req, res) => {
             'ClientAverage': { $avg: '$SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal' },
             'clientCount': { $sum: 1 }
         }
-    }
+    },
+    {$sort:{'ClientTotal': -1}}
     ])
 
     let clientSales = []
