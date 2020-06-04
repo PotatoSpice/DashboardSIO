@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Dasboard from "./page/dasboard/index";
 import Client from "./page/client/index";
 import Saft from "./page/saft/index";
+import Product from "./page/product";
 
 export default function Routes() {
   return (
@@ -12,6 +13,7 @@ export default function Routes() {
         <Route path="/" exact component={Dasboard} />
         <Route path="/client" exact component={Client} />
         <Route path="/saft" exact component={Saft} />
+        <Route path="/product" exact component={Product} />
       </Switch>
     </BrowserRouter>
   );
