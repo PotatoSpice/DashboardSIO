@@ -13,7 +13,7 @@ import "./styles.css";
 
 export default function Dasboard() {
   const [status, setStatus] = useState("");
-  const [year, setYear] = useState(2020);
+  const [year, setYear] = useState(0);
   const [TotalEntries, setTotalEntries] = useState("");
   const [TotalCredit, setTotalCredit] = useState("");
   const [NumberOfSales, setNumberOfSales] = useState("");
@@ -66,10 +66,14 @@ export default function Dasboard() {
   }
 
   useEffect(() => {
+    let ano = localStorage.getItem("year");
+    setYear(+ano);
+    console.log(+ano);
+
     test();
     kpis();
     invoices();
-  }, [status]);
+  }, [status, year]);
 
   return (
     <div>

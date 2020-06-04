@@ -18,7 +18,7 @@ const useStyles = makeStyles({
 });
 
 export default function TableClient() {
-  const [year, setYear] = useState(2020);
+  const [year, setYear] = useState(0);
   const [rows, setRows] = useState([]);
 
   async function invoices() {
@@ -31,8 +31,12 @@ export default function TableClient() {
   }
 
   useEffect(() => {
+    let ano = localStorage.getItem("year");
+    setYear(+ano);
+    console.log(+ano);
+
     invoices();
-  }, []);
+  }, [year]);
 
   const classes = useStyles();
   return (

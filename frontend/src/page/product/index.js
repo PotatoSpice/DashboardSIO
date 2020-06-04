@@ -7,7 +7,7 @@ import api from "../../services/api";
 // import { Container } from './styles';
 
 export default function Product() {
-  const [year, setYear] = useState();
+  const [year, setYear] = useState(0);
   const [name, setName] = useState("");
   const [total, setTotal] = useState("");
   const [count, setCount] = useState("");
@@ -24,8 +24,9 @@ export default function Product() {
     setCount(groupCount);
   }
   useEffect(() => {
-    setYear(localStorage.getItem("year"));
-    console.log("year:" + year);
+    let ano = localStorage.getItem("year");
+    setYear(+ano);
+    console.log(+ano);
     pieProduct();
   }, [year]);
 
