@@ -3,6 +3,8 @@ import Header from "../../components/header/index";
 
 import Pie from "../../components/pie/index";
 import api from "../../services/api";
+import Table from "../../components/tableVenda";
+import TablePro from "../../components/tableProduto";
 
 // import { Container } from './styles';
 
@@ -38,6 +40,7 @@ export default function Product() {
       <Pie labels={name} data={total} alt={"Pie"} />
       <h2>Numero Total por grupo</h2>
       <Pie labels={name} data={count} alt={"Pie"} />
+      <TablePro />
     </div>
   );
 }
