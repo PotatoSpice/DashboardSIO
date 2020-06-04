@@ -27,7 +27,7 @@ export default function TableTest() {
     });
 
     setRows(response.data);
-    console.log(rows);
+    console.log("aqui" + response.data);
   }
 
   useEffect(() => {

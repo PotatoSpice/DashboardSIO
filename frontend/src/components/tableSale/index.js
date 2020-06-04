@@ -17,12 +17,12 @@ const useStyles = makeStyles({
   },
 });
 
-export default function TableClient() {
+export default function TableSale() {
   const [year, setYear] = useState(0);
   const [rows, setRows] = useState([]);
 
   async function invoices() {
-    const response = await api.post("/saft/salesproduct", {
+    const response = await api.post("/saft/sales", {
       FiscalYear: year,
     });
     console.log(response.data);
@@ -45,7 +45,8 @@ export default function TableClient() {
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Product</TableCell>
+              <TableCell>Client Id</TableCell>
+              <TableCell align="right">Name</TableCell>
               <TableCell align="right">Total</TableCell>
               <TableCell align="right">Average</TableCell>
               <TableCell align="right">Count</TableCell>
@@ -53,13 +54,14 @@ export default function TableClient() {
           </TableHead>
           <TableBody>
             {rows.map((row) => (
-              <TableRow key={row.productDesc}>
+              <TableRow key={row.clientTaxID}>
                 <TableCell component="th" scope="row">
-                  {row.productDesc}
+                  {row.clientTaxID}
                 </TableCell>
-                <TableCell align="right">{row.productTotal}</TableCell>
-                <TableCell align="right">{row.productAverage}</TableCell>
-                <TableCell align="right">{row.productCount}</TableCell>
+                <TableCell align="right">{row.clientName}</TableCell>
+                <TableCell align="right">{row.clientTotal}</TableCell>
+                <TableCell align="right">{row.clientAverage}</TableCell>
+                <TableCell align="right">{row.clientCount}</TableCell>
               </TableRow>
             ))}
           </TableBody>
