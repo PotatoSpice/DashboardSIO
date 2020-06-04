@@ -131,7 +131,8 @@ const getClientLocations = async (req, res) => {
     let count = [];
 
     for (data in clientPerLocation) {
-        cities.push(`"${clientPerLocation[data]._id}`);
+        
+        cities.push(`"${clientPerLocation[data]._id}"`);
         count.push(clientPerLocation[data].locationCount);
     }
 
