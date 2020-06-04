@@ -28,7 +28,7 @@ export default function TableProduct() {
     });
     console.log("invoice2");
     console.log("aqui" + response.data);
-    //setRows(response.data);
+    setRows(response.data);
     //console.log(rows);
   }
 
