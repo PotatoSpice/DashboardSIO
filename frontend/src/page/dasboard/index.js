@@ -13,7 +13,7 @@ import "./styles.css";
 
 export default function Dasboard() {
   const [status, setStatus] = useState("");
-  const [year, setYear] = useState(2017);
+  const [year, setYear] = useState(2020);
   const [TotalEntries, setTotalEntries] = useState("");
   const [TotalCredit, setTotalCredit] = useState("");
   const [NumberOfSales, setNumberOfSales] = useState("");
@@ -62,8 +62,7 @@ export default function Dasboard() {
     setMonthsInvoice(months);
     setMonthTotal(monthTotal);
     setMonthNetTotal(monthNetTotal);
-    console.log(months)
-
+    console.log(months);
   }
 
   useEffect(() => {
