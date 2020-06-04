@@ -8,6 +8,3 @@ node_modules/
 
 # Optional npm cache directory
 .npm
-
-# Ignore stored files
-saft
