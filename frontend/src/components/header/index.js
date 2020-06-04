@@ -25,13 +25,13 @@ function header() {
                 </Link>
               </li>
               <li>
-                <Link className="back-link" to="/test">
-                  Opçao2
+                <Link className="back-link" to="/product">
+                  Product
                 </Link>
               </li>
               <li>
-                <Link className="back-link" to="/test">
-                  Opçao3
+                <Link className="back-link" to="/saft">
+                  Saft
                 </Link>
               </li>
             </ul>
