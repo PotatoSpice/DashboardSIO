@@ -251,15 +251,12 @@ const getProductSales = async (req, res) => {
         productTotal = salesPerProduct[i].ProductTotal;
         productAverage = salesPerProduct[i].ProductAverage;
         productCount = salesPerProduct[i].productCount;
-        products.push([{productDesc, productTotal, productAverage, productCount}])
+        products.push({productDesc, productTotal, productAverage, productCount})
     }
 
-    res.json({
-        products,
-        productTotal,
-        productAverage,
-        productCount
-    });
+    res.json(
+        products
+    );
 
 }
 
@@ -312,7 +309,7 @@ const getGroupSales = async (req, res) => {
     }
 
     for(i in groups){
-        groupName.push(groups[i]._id)
+        groupName.push(`"${groups[i]._id}"`)
 
         for(j in products){
             product = products[j].ID;
