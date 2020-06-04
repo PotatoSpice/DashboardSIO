@@ -12,7 +12,7 @@ const app = express();
 mongoose.Promise = global.Promise;
 
 mongoose
-  .connect(`mongodb://localhost:27017/carStore2`, {
+  .connect(`mongodb://localhost:27017/saftDB`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: true,

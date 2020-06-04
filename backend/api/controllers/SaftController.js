@@ -80,6 +80,7 @@ const getSupplierInfo = async (req, res) => {
 //Get all Invoices
 const getInvoices = async (req, res) => {
     const invoices = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
+    {$unwind: '$SourceDocuments.SalesInvoices.Invoice'},
     {
         $project: {
             'SourceDocuments.SalesInvoices.NumberOfEntries': 1,
@@ -91,10 +92,8 @@ const getInvoices = async (req, res) => {
         }
     }
     ])
-
     const stringified = JSON.stringify(invoices);
     const obj = JSON.parse(stringified);
-
     let invoiceInfo = []
 
     let InvoiceNo;
@@ -104,12 +103,13 @@ const getInvoices = async (req, res) => {
     let NetTotal;
     let TaxTotal;
     const NumberOfEntries = obj[0].SourceDocuments.SalesInvoices.NumberOfEntries;
+    console.log(obj[0])
     for (let i = 0; i < NumberOfEntries; i++) {
-        InvoiceNo = obj[0].SourceDocuments.SalesInvoices.Invoice[i].InvoiceNo;
-        InvoiceDate = obj[0].SourceDocuments.SalesInvoices.Invoice[i].InvoiceDate;
-        CustomerID = obj[0].SourceDocuments.SalesInvoices.Invoice[i].CustomerID;
-        GrossTotal = obj[0].SourceDocuments.SalesInvoices.Invoice[i].DocumentTotals.GrossTotal;
-        NetTotal = obj[0].SourceDocuments.SalesInvoices.Invoice[i].DocumentTotals.NetTotal;
+        InvoiceNo = obj[i].SourceDocuments.SalesInvoices.Invoice.InvoiceNo;
+        InvoiceDate = obj[i].SourceDocuments.SalesInvoices.Invoice.InvoiceDate;
+        CustomerID = obj[i].SourceDocuments.SalesInvoices.Invoice.CustomerID;
+        GrossTotal = obj[i].SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal;
+        NetTotal = obj[i].SourceDocuments.SalesInvoices.Invoice.DocumentTotals.NetTotal;
         TaxTotal = GrossTotal - NetTotal;
         invoiceInfo.push({ InvoiceNo, InvoiceDate, CustomerID, GrossTotal, NetTotal, TaxTotal })
     }
@@ -301,7 +301,6 @@ const getGroupSales = async (req, res) => {
     let groupName = [];
     let groupTotal = [];
     let groupCount = [];
-    let groupArray = []
     let pindex;
 
     for(i in groups){
@@ -357,19 +356,22 @@ const getValues = async (req, res) => {
     //Retorna o total de Compras(index 1) e Vendas (index 0)
     const jsonTotalSalesAndPurchases = await saft.aggregate([{ $match: { 'Header.FiscalYear': req.body.FiscalYear } },
     { $unwind: '$GeneralLedgerEntries.Journal' },
+    { $unwind: '$GeneralLedgerEntries.Journal.Transaction' },
     {
         $group: {
             '_id': '$GeneralLedgerEntries.Journal.Description',
-            'Total': { $sum: '$GeneralLedgerEntries.Journal.Transaction.Line.CreditLine.CreditAmount' },
+            'Total': { $sum: '$GeneralLedgerEntries.Journal.Transaction.Lines.CreditLine.CreditAmount' },
         }
     },
-    ])
+    {$sort:{_id:1}}
+])
 
     const stringifiedTotals = JSON.stringify(jsonTotalSalesAndPurchases);
     const obj2 = JSON.parse(stringifiedTotals);
-
+    console.log(obj2)
     const totalCompras = obj2[0].Total;
-    const totalVendas = obj2[0].Total;
+    const totalVendas = obj2[1].Total;
+
 
     res.json({
         TotalEntries: TotalEntries,

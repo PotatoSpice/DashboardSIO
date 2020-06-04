@@ -115,7 +115,7 @@ const uploadParseSaft = async (req, res, next) => {
             }
             await Saft(saveSaft).save().catch(next);
             console.log('# DB_SAVE: parsed JSON SAF-T saved to the Database!');
-
+            
             res.json(jsonSaft);
 
             await fs.unlink(req.file.path); // remover o ficheiro temporario (opcional)
