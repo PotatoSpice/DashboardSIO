@@ -1,5 +1,7 @@
-const fs = require('fs').promises;
+const fsp = require('fs').promises;
+const fs = require('fs');
 const xml2js = require('xml2js');
+const schemaValidator = require('xsd-schema-validator')
 
 // Processar os numeros que estejam em formato string para numero
 // const { parseBooleans, parseNumbers } = require('xml2js').processors;
@@ -52,59 +54,142 @@ const parseJsonNumbers = function(json) {
 	return json;
 }
 
-const parseAndValidateSaft = async function(fileDetails, fileData) {
-    // # parse & validation
-    // https://github.com/libxmljs/libxmljs
-    // https://stackoverflow.com/questions/14856643/validating-xml-against-a-schema-xsd-in-nodejs
-
-    let json = await parser.parseStringPromise(fileData);
-
-    if (json) {
-        json = parseJsonNumbers(json);
-        // fs.writeFile('C:\\Users\\Asus\\Desktop\\temp.json', JSON.stringify(json))
-
-        const version = json.AuditFile.Header.AuditFileVersion;
-        if (!(version === '1.01_01' || version === '1.02_01' || version === '1.03_01' || version === '1.04_01')) 
-        { // check SAF-T file version
-            throw new Error('Versão do SAF-T desatualizada. Deverá ser enviado um documento com uma das versões disponíveis.');
-        }
-        else if (false) { // check SAF-T with XSD
-            throw new Error('SAF-T não está de acordo com as normas! Ver definição do XSD Schema para a versão do documento.');
-        } else {
-            return json;
-        }
-    } else {
-        return undefined;
-    }
+const deleteTempFile = function(file_path) {
+    // # Remover o ficheiro temporario (opcional)
+    console.log('# DELETE: deleting temporary Multer upload file ...');
+    fs.unlink(file_path, function(err) {
+        if (!err) console.log('- deleted temporary file -');
+        else console.log('- something went wrong -');
+    })
 }
 
-const uploadParseSaft = async (req, res, next) => {
+const uploadParseSaft = function (req, res, next) {
     if (!req.file) {
         next({
             message: 'Bad Request. SAF-T não foi recebido!',
             status: 400
         })
+
     } else {
+        const file_path = req.file.path;
 
         // # Ler o ficheiro SAF-T recebido pelo 'multer'
-        const xmlSaft = await fs.readFile(req.file.path).catch(next);
-        console.log('# READ: received XML SAF-T read successfully!');
+        console.log('# READ: reading received XML SAF-T ...');
+        fs.readFile(file_path, function(err, xmlSaft) { // CB
+            if (err) {
+                next({ message: err.message, status: err.status })
+                deleteTempFile(file_path)
+                return;
+            }
+            console.log('- success -');
+            
+            // # Validar SAF-T XML com XSD
+            console.log('# CHECK: validating XML SAF-T with related XSD Schema ...');
+            schemaValidator.validateXML({file: file_path}, `saft_validation/SAFTPT1.04_01.xsd`, function(err, result) { // CB
+                if (err) {
+                    next({ message: err.message, status: err.status })
+                    deleteTempFile(file_path)
+                    return;
+
+                } else if (result.valid) {
+                    console.log('- success -');
+
+                    // # Parse do XML para JSON
+                    console.log('# CHECK: parsing XML SAF-T parsed into JSON ...');
+                    parser.parseString(xmlSaft, function(err, jsonSaft) { // CB
+                        if (err) {
+                            next({ message: err.message, status: err.status })
+                            deleteTempFile(file_path)
+                            return;
+                        }
+                        console.log('- success -');
+
+                        // transformar strings de números em números
+                        console.log('# CHECK: parsing Numbers in String into Number type ...');
+                        jsonSaft = parseJsonNumbers(jsonSaft);
+                        console.log('- success -');
+
+                        // # Colocar o JSON na collection 'Saft'
+                        const saveSaft = {
+                            Header: jsonSaft.AuditFile.Header,
+                            MasterFiles: jsonSaft.AuditFile.MasterFiles || undefined,
+                            GeneralLedgerEntries: jsonSaft.AuditFile.GeneralLedgerEntries || undefined,
+                            SourceDocuments: jsonSaft.AuditFile.SourceDocuments || undefined
+                        }
+                        console.log('# DB_SAVE: saving parsed JSON SAF-T to the Database ...');
+                        Saft(saveSaft).save( function(err) {
+                            if (err) {
+                                next({ message: err.message, status: err.status })
+                                deleteTempFile(file_path)
+                                return;
+                            }
+                            console.log('- success -');
+
+                            // # Envio da resposta para o Client
+                            res.json(jsonSaft);
+
+                            deleteTempFile(file_path)
+                        })
+                    })
+                } else {
+                    next({ 
+                        message: 'SAF-T invalidado pelo Schema! Deverá ser enviado um documento com a última versão do SAFTPT disponivel.', 
+                        status: 404 
+                    })
+                }
+            })
+        })
+    }
+}
+
+module.exports = {
+    uploadParseSaft
+}
+
+// ## DEPRECATED
+// # Versão em Promises do upload do ficheiro. Não se realiza a validação do XML pelo XSD Schema!
+const uploadParseSaftPromise = async (req, res, next) => {
+    if (!req.file) {
+        next({
+            message: 'Bad Request. SAF-T não foi recebido!',
+            status: 400
+        })
+        
+    } else {
+        // # Ler o ficheiro SAF-T recebido pelo 'multer'
+        console.log('# READ: reading received XML SAF-T ...');
+        const xmlSaft = await fsp.readFile(req.file.path).catch(next);
+        console.log('- success -');
 
         // # Validar SAF-T XML com XSD e Parse para JSON
-        const jsonSaft = await parseAndValidateSaft(req.file, xmlSaft).catch(next);
+        console.log('# CHECK: parsing XML SAF-T parsed into JSON ...');
+        const json = await parser.parseStringPromise(xmlSaft).catch(next);
 
-        if (jsonSaft) {
-            console.log('# PARSE: XML SAF-T parsed successfully into a JSON!');
+        if (json) {
+            console.log('- success -');
 
-            // # Guardar o SAF-T temporario
-            const xmlFile = `./saft/SAFTPT_${ jsonSaft.AuditFile.Header.AuditFileVersion }_${ jsonSaft.AuditFile.Header.FiscalYear }_${ Date.now() }.xml`;
-            const jsonFile = `./saft/SAFTPT_${ jsonSaft.AuditFile.Header.AuditFileVersion }_${ jsonSaft.AuditFile.Header.FiscalYear }_${ Date.now() }.json`;
-            
-            await Promise.all([
-                fs.writeFile(xmlFile, xmlSaft), 
-                fs.writeFile(jsonFile, jsonSaft)]).catch(next);
-            console.log('# SAVED: received XML SAF-T successfully saved!');
-            console.log('# SAVED: parsed XML SAF-T successfully saved!');
+            // transformar strings de números em números
+            console.log('# CHECK: parsing Numbers in String into Number type ...');
+            const jsonSaft = parseJsonNumbers(json);
+            console.log('- success -');
+
+            const version = json.AuditFile.Header.AuditFileVersion;
+            if (!(version === '1.01_01' || version === '1.02_01' || version === '1.03_01' || version === '1.04_01')) 
+            { // check SAF-T file version
+                next({
+                    message: 'Versão do SAF-T desatualizada. Deverá ser enviado um documento com uma das versões disponíveis.',
+                    status: 404
+                })
+            }
+
+            // // # Guardar o XML recebido e o JSON transformado (opcional)
+            // const xmlFile = `./saft/SAFTPT_${ jsonSaft.AuditFile.Header.AuditFileVersion }_${ jsonSaft.AuditFile.Header.FiscalYear }_${ Date.now() }.xml`;
+            // const jsonFile = `./saft/SAFTPT_${ jsonSaft.AuditFile.Header.AuditFileVersion }_${ jsonSaft.AuditFile.Header.FiscalYear }_${ Date.now() }.json`;
+            // await Promise.all([
+            //     fsp.writeFile(xmlFile, xmlSaft), 
+            //     fsp.writeFile(jsonFile, jsonSaft)]).catch(next);
+            // console.log('# SAVED: received XML SAF-T successfully saved!');
+            // console.log('# SAVED: parsed XML SAF-T successfully saved!');
 
             // # Como não se vai modelar a BD, colocar o JSON na collection 'Saft'
             const saveSaft = {
@@ -113,17 +198,17 @@ const uploadParseSaft = async (req, res, next) => {
                 GeneralLedgerEntries: jsonSaft.AuditFile.GeneralLedgerEntries || undefined,
                 SourceDocuments: jsonSaft.AuditFile.SourceDocuments || undefined
             }
+            console.log('# DB_SAVE: saving parsed JSON SAF-T to the Database ...');
             await Saft(saveSaft).save().catch(next);
-            console.log('# DB_SAVE: parsed JSON SAF-T saved to the Database!');
+            console.log('- success -');
             
+            // # Envio da resposta para o Client
             res.json(jsonSaft);
 
-            await fs.unlink(req.file.path); // remover o ficheiro temporario (opcional)
-            console.log('# DELETED: temporary SAF-T successfully removed!');
+            // # Remover o ficheiro temporario (opcional)
+            console.log('# DELETE: deleting temporary SAF-T ...');
+            await fsp.unlink(req.file.path);
+            console.log('- success -');
         }
     }
-}
-
-module.exports = {
-    uploadParseSaft
 }

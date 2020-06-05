@@ -9,7 +9,7 @@ const saftFilter = (_, file, cb) => {
         'text/xml'
     ];
 
-    if(fileExt === '.xml' && allowedMimes.includes(file.mimetype)) {
+    if(fileExt.toLowerCase() === '.xml' && allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
         cb(new Error('Invalid file type. Only XML (SAF-T) files are allowed!'));
@@ -19,7 +19,7 @@ const saftFilter = (_, file, cb) => {
 // Configuração MULTER STORAGE
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
-		cb(null, './saft/temp')
+		cb(null, 'uploads/')
 	},
 	filename: function (req, file, cb) {
 		req.uploadedFile = `${ file.originalname }`
