@@ -80,7 +80,7 @@ const getSupplierInfo = async (req, res) => {
 //Get all Invoices
 const getInvoices = async (req, res) => {
     const invoices = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
-    {$unwind: '$SourceDocuments.SalesInvoices.Invoice'},
+    { $unwind: '$SourceDocuments.SalesInvoices.Invoice' },
     {
         $project: {
             'SourceDocuments.SalesInvoices.NumberOfEntries': 1,
@@ -131,7 +131,7 @@ const getClientLocations = async (req, res) => {
     let count = [];
 
     for (data in clientPerLocation) {
-        
+
         cities.push(`"${clientPerLocation[data]._id}"`);
         count.push(clientPerLocation[data].locationCount);
     }
@@ -155,7 +155,7 @@ const getSales = async (req, res) => {
             'clientCount': { $sum: 1 }
         }
     },
-    {$sort:{'ClientTotal': -1}}
+    { $sort: { '_id': -1 } }
     ])
 
     let clientSales = []
@@ -172,20 +172,25 @@ const getSales = async (req, res) => {
         {
             $project: {
                 'MasterFiles.Customer.CustomerTaxID': 1,
-                'MasterFiles.Customer.CompanyName': 1
+                'MasterFiles.Customer.CompanyName': 1,
+                'MasterFiles.Customer.CustomerID': 1
             }
-        }
+        },
+        { $sort: { '_id': -1 } }
     ])
 
     const stringified = JSON.stringify(client);
     const obj = JSON.parse(stringified);
-    for (data in salesPerClient) {
-        clientTaxID = obj[data].MasterFiles.Customer.CustomerTaxID;
-        clientName = obj[data].MasterFiles.Customer.CompanyName;
-        clientTotal = salesPerClient[data].ClientTotal;
-        clientAverage = salesPerClient[data].ClientAverage;
-        clientCount = salesPerClient[data].clientCount;
-        clientSales.push({ clientTaxID, clientName, clientTotal, clientAverage, clientCount })
+    for (data in obj) {
+        for (i in salesPerClient)
+        if (obj[data].MasterFiles.Customer.CustomerID == salesPerClient[i]._id) {
+            clientTaxID = obj[data].MasterFiles.Customer.CustomerTaxID;
+            clientName = obj[data].MasterFiles.Customer.CompanyName;
+            clientTotal = salesPerClient[i].ClientTotal;
+            clientAverage = salesPerClient[i].ClientAverage;
+            clientCount = salesPerClient[i].clientCount;
+            clientSales.push({ clientTaxID, clientName, clientTotal, clientAverage, clientCount })
+        }
     }
 
     res.json(
@@ -206,7 +211,7 @@ const getProducts = async (req, res) => {
     }
 
     ])
-    
+
     const stringified = JSON.stringify(productsJson);
     const obj = JSON.parse(stringified);
 
@@ -253,7 +258,7 @@ const getProductSales = async (req, res) => {
         productTotal = salesPerProduct[i].ProductTotal;
         productAverage = salesPerProduct[i].ProductAverage;
         productCount = salesPerProduct[i].productCount;
-        products.push({productDesc, productTotal, productAverage, productCount})
+        products.push({ productDesc, productTotal, productAverage, productCount })
     }
 
     res.json(
@@ -289,7 +294,7 @@ const getGroupSales = async (req, res) => {
         console.log(products[i])
     }
 
-    const groups = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear} },
+    const groups = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
     { $unwind: '$MasterFiles.Product' },
     {
         $group: {
@@ -305,19 +310,19 @@ const getGroupSales = async (req, res) => {
     let groupCount = [];
     let pindex;
 
-    for(i in groups){
+    for (i in groups) {
         groupTotal[i] = 0;
         groupCount[i] = 0
     }
 
-    for(i in groups){
+    for (i in groups) {
         groupName.push(`"${groups[i]._id}"`)
 
-        for(j in products){
+        for (j in products) {
             product = products[j].ID;
-            if(groups[i].ProductCodes.includes(product)){
+            if (groups[i].ProductCodes.includes(product)) {
                 pindex = products.findIndex(p => p.ID === product);
-                if(pindex!=1){
+                if (pindex != 1) {
                     groupTotal[i] += productTotal[pindex];
                     groupCount[i] += productCount[pindex];
                 }
@@ -365,8 +370,8 @@ const getValues = async (req, res) => {
             'Total': { $sum: '$GeneralLedgerEntries.Journal.Transaction.Lines.CreditLine.CreditAmount' },
         }
     },
-    {$sort:{_id:1}}
-])
+    { $sort: { _id: 1 } }
+    ])
 
     const stringifiedTotals = JSON.stringify(jsonTotalSalesAndPurchases);
     const obj2 = JSON.parse(stringifiedTotals);
