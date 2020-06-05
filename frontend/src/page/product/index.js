@@ -6,7 +6,7 @@ import api from "../../services/api";
 import Table from "../../components/tableVenda";
 import TablePro from "../../components/tableProduto";
 
-// import { Container } from './styles';
+import "./styles.css";
 
 export default function Product() {
   const [year, setYear] = useState(0);
@@ -35,12 +35,24 @@ export default function Product() {
   return (
     <div>
       <Header />
-      <h1>Product</h1>
-      <h2>Valor Total por grupo</h2>
-      <Pie labels={name} data={total} alt={"Pie"} />
-      <h2>Numero Total por grupo</h2>
-      <Pie labels={name} data={count} alt={"Pie"} />
-      <TablePro />
+      <h1 className="title">
+        Product
+        <img
+          className="iconD"
+          src="https://img.icons8.com/pastel-glyph/64/000000/product.png"
+        />
+      </h1>
+      <div className="pies">
+        <div className="pie">
+          <h2>Valor Total por grupo</h2>
+          <Pie labels={name} data={total} alt={"Pie"} />
+        </div>
+        <div className="pie">
+          <h2>Numero Total por grupo</h2>
+          <Pie labels={name} data={count} alt={"Pie"} />
+        </div>
+      </div>
+      <TablePro className="tableP" />
     </div>
   );
 }

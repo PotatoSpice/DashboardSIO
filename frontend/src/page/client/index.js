@@ -6,7 +6,7 @@ import Table from "../../components/tableClient/index";
 import TableSale from "../../components/tableSale/index";
 import Pie from "../../components/pie/index";
 
-// import { Container } from './styles';
+import "./styles.css";
 
 function Client() {
   const [year, setYear] = useState(0);
@@ -33,8 +33,21 @@ function Client() {
   return (
     <div>
       <Header />
-      <h1>Client</h1>
+      <h1 className="title">
+        Client
+        <img
+          className="iconD"
+          src="https://img.icons8.com/pastel-glyph/64/000000/business-group.png"
+        />
+      </h1>
       <Table />
+      <h1 className="title">
+        Location
+        <img
+          className="iconD"
+          src="https://img.icons8.com/carbon-copy/100/000000/worldwide-location.png"
+        />
+      </h1>
       <Pie labels={cities} data={count} alt={"Pie"} />
     </div>
   );

@@ -3,7 +3,7 @@ import Header from "../../components/header/index";
 
 import api from "../../services/api";
 
-// import { Container } from './styles';
+import "./styles.css";
 
 export default function Saft() {
   const [saft, setSaft] = useState(null);
@@ -28,30 +28,36 @@ export default function Saft() {
   return (
     <div>
       <Header />
-      <h1>saft</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          onChange={(event) => setSaft(event.target.files[0])}
-        />
+      <div className="saft">
+        <h1 className="title">Import SAFT</h1>
+        <form onSubmit={handleSubmit}>
+          <input
+            className="inp"
+            type="file"
+            onChange={(event) => setSaft(event.target.files[0])}
+          />
 
-        <button type="submit" className="btn">
-          Cadastrar
-        </button>
-      </form>
+          <button type="submit" className="btn1">
+            Import
+          </button>
+        </form>
+      </div>
 
-      <h1>Ano</h1>
-      <form onSubmit={setAno}>
-        <input
-          type="number"
-          value={year}
-          placeholder="Ano do saft?"
-          onChange={(event) => setYear(event.target.value)}
-        />
-        <button type="submit" className="btn">
-          Cadastrar
-        </button>
-      </form>
+      <div className="year">
+        <h1 className="title">Year</h1>
+        <form onSubmit={setAno}>
+          <input
+            className="in"
+            type="number"
+            value={year}
+            placeholder="Ano do saft?"
+            onChange={(event) => setYear(event.target.value)}
+          />
+          <button type="submit" className="btn1">
+            OK
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

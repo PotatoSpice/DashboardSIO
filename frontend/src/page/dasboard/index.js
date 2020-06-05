@@ -78,7 +78,13 @@ export default function Dasboard() {
   return (
     <div>
       <Header />
-      <h1>Dasboard</h1>
+      <h1 className="title">
+        Dashboard
+        <img
+          src="https://img.icons8.com/wired/64/000000/dashboard.png"
+          className="iconD"
+        />
+      </h1>
       <div className="kpis">
         <Cardtext
           icon={"https://img.icons8.com/ios/64/000000/list.png"}
@@ -123,34 +129,15 @@ export default function Dasboard() {
           alt={"Invoices"}
         />
       </div>
-      <Pie
-        labels={`["January", "February", "March"]`}
-        data={`[50, 60, 70]`}
-        alt={"Pie Chart"}
-      />
-      <Bar
-        labels={`["January", "February", "March"]`}
-        data={`[50, 60, 70]`}
-        set={"Users"}
-      />
 
-      <TableTest />
-
-      <Line
-        labels={`["January", "February", "March"]`}
-        data={`[50, 60, 70]`}
-        name={"User"}
-        alt={"User"}
-      />
-
-      <DoubleLine
-        labels={`["January", "February", "March"]`}
-        data1={`[50, 60, 70]`}
-        name1={"User"}
-        data2={`[25, 80, 5]`}
-        name2={"Test"}
-        alt={"User"}
-      />
+      <h1 className="titleI">
+        Invoices Table
+        <img
+          src="https://img.icons8.com/pastel-glyph/64/000000/invoice-1.png"
+          className="iconD"
+        />
+      </h1>
+      <TableTest className="tableI" />
     </div>
   );
 }

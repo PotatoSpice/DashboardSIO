@@ -1,0 +1,47 @@
+.saft * {
+  display: flex;
+  flex-direction: column;
+}
+
+.year * {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn1 {
+  width: 10%;
+  height: 60px;
+  background: white;
+  border: 0;
+  border-radius: 8px;
+  color: #252525;
+  font-weight: 700;
+  margin-top: 16px;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 60px;
+  border: 2px solid #252525;
+
+  transition: filter 0.2s;
+  padding-left: 15px;
+  margin-left: 20px;
+}
+
+.btn1:hover {
+  filter: brightness(90%);
+}
+
+.in {
+  margin-left: 20px;
+  width: 200px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.inp {
+  margin-left: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
