@@ -123,12 +123,11 @@ export default function Dasboard() {
         <DoubleLine
           labels={monthsInvoice}
           data1={monthTotal}
-          name1={"Total Invoices"}
+          name1={"Total Value of invoices per month"}
           data2={monthNetTotal}
-          name2={"Total Average Invoices"}
+          name2={"Total Average Value of invoices per month"}
           alt={"Invoices"}
         />
-        <h2>€ per month</h2>
       </div>
 
       <h1 className="titleI">

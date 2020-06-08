@@ -47,9 +47,9 @@ export default function TableTest() {
               <TableCell>Invoice</TableCell>
               <TableCell align="right">Date</TableCell>
               <TableCell align="right">Customer</TableCell>
-              <TableCell align="right">Gross Total</TableCell>
-              <TableCell align="right">Net Total</TableCell>
-              <TableCell align="right">Tax Total</TableCell>
+              <TableCell align="right">Gross Total (€)</TableCell>
+              <TableCell align="right">Net Total (€)</TableCell>
+              <TableCell align="right">Tax Total (€)</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

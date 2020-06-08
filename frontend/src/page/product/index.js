@@ -5,6 +5,7 @@ import Pie from "../../components/pie/index";
 import api from "../../services/api";
 import TablePro from "../../components/tableProduto";
 import Table from "../../components/tableVenda";
+import Bar from "../../components/bar";
 
 import "./styles.css";
 

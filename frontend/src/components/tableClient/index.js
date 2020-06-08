@@ -47,7 +47,7 @@ export default function TableClient() {
             <TableRow>
               <TableCell>Client Tax Id</TableCell>
               <TableCell align="right">Name</TableCell>
-              <TableCell align="right">Total</TableCell>
+              <TableCell align="right">Total Spent (€)</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
