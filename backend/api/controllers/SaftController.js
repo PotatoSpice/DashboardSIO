@@ -176,7 +176,7 @@ const getPieChartCustomer = async (req, res, next) => {
         { $sort: { '_id': -1 } }
     ]).catch(next);
 
-    let customer = [], percent = [], totalCount, countPercentage;
+    let customer = [], percent = [], totalCount = 0, countPercentage = 0;
 
     for (i in salesPerClient) {
         totalCount += salesPerClient[i].clientPurchases;
@@ -185,9 +185,9 @@ const getPieChartCustomer = async (req, res, next) => {
     for (data in client) {
         for (i in salesPerClient)
         if (client[data].MasterFiles.Customer.CustomerID == salesPerClient[i]._id) {
-            customer.push(`"${client.CompanyName}"`)
+            customer.push(`"${client[data].MasterFiles.Customer.CompanyName}"`)
             countPercentage = (salesPerClient[i].clientPurchases / totalCount) * 100;
-            percent.push( (Math.round(countPercentage * 100) / 100).toFixed(1) )
+            percent.push( +(Math.round(countPercentage * 100) / 100).toFixed(1) )
         }
     }
 
