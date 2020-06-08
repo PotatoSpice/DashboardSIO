@@ -6,26 +6,25 @@ router.get('/status', async (req, res)=>{
     res.status("OK");
 })
 
-router.post('/company', saft.getCompanyInfo)
-
+// # JSON SAF-T PT
 router.post('/allinfo', saft.getJSON)
 
-router.post('/dashboard', saft.getInfo) //Sales + Purchases
+// # HOME
+router.post('/kpi', saft.getKpiInfo)
+router.post('/dashboard', saft.getDiagramInvoices) //Sales + Purchases
+router.post('/invoices', saft.getTableInvoices)
+// # CLIENT
+router.post('/sales', saft.getTableCustomer) // Customers + Their Sales
+router.post('/customers', saft.getPieChartCustomer)
+// # PRODUCT
+// router.post('/productlisting', saft.getProducts) //Just Products
+router.post('/salesproduct', saft.getTableProductSales)
+router.post('/productgroups', saft.getPieChartProductGroupSales) //Values per group
 
-router.post('/customer/:id', saft.getClientInfo) 
-
+// # MISC
+router.post('/company', saft.getCompanyInfo)
+router.post('/customer/:id', saft.getClientInfo)
 router.post('/supplier/:id', saft.getSupplierInfo) 
-
-router.post('/invoices', saft.getInvoices)
-
-router.post('/sales', saft.getSales) // Customers + Their Sales
-router.post('/locations', saft.getClientLocations)
-
 router.post('/product/:id', saft.getProductInfo)
-router.post('/salesproduct', saft.getProductSales)
-router.post('/productlisting', saft.getProducts) //Just Products
-router.post('/productgroups', saft.getGroupSales) //Values per group
-
-router.post('/kpi', saft.getValues)
 
 module.exports = router; 

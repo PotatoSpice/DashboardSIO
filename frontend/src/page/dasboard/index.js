@@ -14,9 +14,9 @@ import "./styles.css";
 export default function Dasboard() {
   const [status, setStatus] = useState("");
   const [year, setYear] = useState(0);
-  const [TotalEntries, setTotalEntries] = useState("");
-  const [TotalCredit, setTotalCredit] = useState("");
+  const [TotalProfit, setTotalProfit] = useState("");
   const [NumberOfSales, setNumberOfSales] = useState("");
+  const [NumberOfPurchases, setNumberOfPurchases] = useState("");
   const [SalesValue, setSalesValue] = useState("");
   const [totalCompras, setTotalCompras] = useState("");
   const [totalVendas, setTotalVendas] = useState("");
@@ -36,17 +36,17 @@ export default function Dasboard() {
     });
 
     const {
-      TotalEntries,
-      TotalCredit,
+      TotalProfit,
       NumberOfSales,
+      NumberOfPurchases,
       SalesValue,
       totalCompras,
       totalVendas,
     } = response.data;
 
-    setTotalEntries(TotalEntries);
-    setTotalCredit(TotalCredit);
+    setTotalProfit(TotalProfit);
     setNumberOfSales(NumberOfSales);
+    setNumberOfPurchases(NumberOfPurchases);
     setSalesValue(SalesValue);
     setTotalCompras(totalCompras);
     setTotalVendas(totalVendas);
@@ -88,34 +88,35 @@ export default function Dasboard() {
       <div className="kpis">
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/sales-performance.png"}
-          text={"Number Of Sales"}
+          text={"Number Of Sales: "}
           resolte={NumberOfSales}
         />
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/sales-performance.png"}
-          text={"Net Sales Value:"}
+          text={"Total Credit Value:"}
           resolte={SalesValue + "€"}
         />
         <Cardtext
           icon={"https://img.icons8.com/carbon-copy/100/000000/total-sales.png"}
-          text={"Total Sales:"}
+          text={"Total Gained on Sales:"}
           resolte={totalVendas + "€"}
         />
+        <br/>
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/shop.png"}
-          text={"Number of purchase: "}
-          resolte={TotalEntries - NumberOfSales}
+          text={"Number of Purchases: "}
+          resolte={NumberOfPurchases}
         />
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/shop.png"}
-          text={"Total of purchase: "}
+          text={"Total Spent on Purchases: "}
           resolte={totalCompras + "€"}
         />
 
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/shop.png"}
-          text={"Total of profit: "}
-          resolte={SalesValue - totalCompras + "€"}
+          text={"Total Profit ( sales - purchases ): "}
+          resolte={TotalProfit + "€"}
         />
       </div>
 
@@ -125,7 +126,7 @@ export default function Dasboard() {
           data1={monthTotal}
           name1={"Total Value of invoices per month"}
           data2={monthNetTotal}
-          name2={"Total Average Value of invoices per month"}
+          name2={"Average Value of invoices per month"}
           alt={"Invoices"}
         />
       </div>

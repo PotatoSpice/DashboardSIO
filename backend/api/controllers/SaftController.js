@@ -1,31 +1,62 @@
-const mongoose = require('mongoose');
 const saft = require('../models/Saft');
 
-const getCompanyInfo = async (req, res) => {
-    const companyInfo = await saft.find({ 'AuditFile.Header.FiscalYear': +req.body.FiscalYear },
-        { '$project': { 'info': AuditFile.Header } })
+const getKpiInfo = async (req, res, next) => {
+    const movementsInfo = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
+    {
+        $project: {
+            'SourceDocuments.SalesInvoices.NumberOfEntries': 1,
+            'SourceDocuments.SalesInvoices.TotalCredit': 1,
+            'GeneralLedgerEntries.NumberOfEntries': 1,
+            'GeneralLedgerEntries.TotalCredit': 1
+        }
+    }
+    ]).catch(next)
+
+    //Retorna o total de Compras(index 1) e Vendas (index 0)
+    const jsonTotalSalesAndPurchases = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
+    { $unwind: '$GeneralLedgerEntries.Journal' },
+    { $unwind: '$GeneralLedgerEntries.Journal.Transaction' },
+    { $unwind: '$GeneralLedgerEntries.Journal.Transaction.Lines.CreditLine' },
+    {
+        $group: {
+            '_id': '$GeneralLedgerEntries.Journal.Description',
+            'Total': { $sum: '$GeneralLedgerEntries.Journal.Transaction.Lines.CreditLine.CreditAmount' },
+        }
+    },
+    { $sort: { _id: 1 } }
+    ]).catch(next)
+
+    if ((movementsInfo && movementsInfo.length > 0) && 
+        (jsonTotalSalesAndPurchases && jsonTotalSalesAndPurchases.length > 0)) {
+
+        // const stringified = JSON.stringify(movementsInfo);
+        // const obj = JSON.parse(stringified);
+        const TotalEntries = movementsInfo[0].GeneralLedgerEntries.NumberOfEntries;
+        // const TotalCredit = movementsInfo[0].GeneralLedgerEntries.TotalCredit;
+        const NumberOfSales = movementsInfo[0].SourceDocuments.SalesInvoices.NumberOfEntries;
+        const SalesValue = movementsInfo[0].SourceDocuments.SalesInvoices.TotalCredit;
+
+        // const stringifiedTotals = JSON.stringify(jsonTotalSalesAndPurchases);
+        // const obj2 = JSON.parse(stringifiedTotals);
+        const totalCompras = jsonTotalSalesAndPurchases[0].Total;
+        const totalVendas = jsonTotalSalesAndPurchases[1].Total;
+
+        res.json({
+            TotalEntries: TotalEntries,
+            TotalProfit: (Math.round((SalesValue - totalCompras) * 100) / 100).toFixed(2),
+            NumberOfSales: NumberOfSales,
+            NumberOfPurchases: TotalEntries - NumberOfSales,
+            SalesValue: SalesValue,
+            totalCompras: totalCompras,
+            totalVendas: totalVendas
+        })
+    } else {
+        next({ message: `No Transaction Movements data was found for the requested ${ req.body.FiscalYear } Fiscal Year!`, status: 404 })
+    }
 }
 
-const getJSON = async (req, res, next) => {
-    /*const found = await saft.find().exec((err, collection) => {
-        if (err) {
-            console.log('Error:', err);
-        } else {
-            res.json(collection);
-        }
-    }); */
-
-    const found = await saft.find().catch(next);
-
-    if (found) {
-        res.json(found)
-    } else {
-        console.log("Is null");
-    }
-};
-
 //Retorna informação referente a cada Movimentação: Ou seja, valores de  compras() e vendas(organizadas por período)
-const getInfo = async (req, res, next) => {
+const getDiagramInvoices = async (req, res, next) => {
 
     // console.log(req.body.FiscalYear)
 
@@ -60,22 +91,8 @@ const getInfo = async (req, res, next) => {
     })
 }
 
-//Search for a Client/Customer using its ID
-const getClientInfo = async (req, res, next) => {
-    const clientInfo = await saft.find({ 'Header.FiscalYear': +req.body.FiscalYear, 'MasterFiles.Customer.CustomerTaxID': req.params.id },
-        { 'MasterFiles.Customer.$': 1 }).catch(next);
-    res.json(clientInfo)
-}
-
-//Search for a Supplier using its ID
-const getSupplierInfo = async (req, res, next) => {
-    const requestInfo = await saft.find({ 'Header.FiscalYear': +req.body.FiscalYear, 'MasterFiles.Supplier.SupplierID': req.params.id },
-        { 'MasterFiles.Supplier.$': 1 }).catch(next);
-    res.json(requestInfo)
-}
-
 //Get all Invoices
-const getInvoices = async (req, res, next) => {
+const getTableInvoices = async (req, res, next) => {
 
     console.log('FISCAL YEAR: ' + req.body.FiscalYear)
 
@@ -93,17 +110,13 @@ const getInvoices = async (req, res, next) => {
     }
     ]).catch(next)
 
-    if (invoices.length > 0) {
+    // # Organizar os dados depois de efetuada a Query (remover os embeded documents)
+    if (invoices && invoices.length > 0) {
         // const stringified = JSON.stringify(invoices);
         // const obj = JSON.parse(stringified);
         let invoiceInfo = []
 
-        let InvoiceNo;
-        let InvoiceDate;
-        let CustomerID;
-        let GrossTotal;
-        let NetTotal;
-        let TaxTotal;
+        let InvoiceNo, InvoiceDate, CustomerID, GrossTotal, NetTotal, TaxTotal;
         const NumberOfEntries = invoices[0].SourceDocuments.SalesInvoices.NumberOfEntries;
         // console.log(invoices[0])
         for (let i = 0; i < NumberOfEntries; i++) {
@@ -112,7 +125,7 @@ const getInvoices = async (req, res, next) => {
             CustomerID = invoices[i].SourceDocuments.SalesInvoices.Invoice.CustomerID;
             GrossTotal = invoices[i].SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal;
             NetTotal = invoices[i].SourceDocuments.SalesInvoices.Invoice.DocumentTotals.NetTotal;
-            TaxTotal = GrossTotal - NetTotal;
+            TaxTotal = (Math.round((GrossTotal - NetTotal) * 100) / 100).toFixed(2);
             invoiceInfo.push({ InvoiceNo, InvoiceDate, CustomerID, GrossTotal, NetTotal, TaxTotal })
         }
         res.json(invoiceInfo)
@@ -121,7 +134,8 @@ const getInvoices = async (req, res, next) => {
     }
 }
 
-const getClientLocations = async (req, res, next) => {
+const getPieChartCustomer = async (req, res, next) => {
+    // ## Info for Client per Location PIE CHART
     const clientPerLocation = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
     { $unwind: '$MasterFiles.Customer' },
     {
@@ -132,24 +146,61 @@ const getClientLocations = async (req, res, next) => {
     }
     ]).catch(next)
 
-    let cities = [];
-    let count = [];
+    let cities = [], count = [];
 
     for (data in clientPerLocation) {
-
         cities.push(`"${clientPerLocation[data]._id}"`);
         count.push(clientPerLocation[data].locationCount);
     }
 
+    // ## Info for Percentage Sales per Client PIE CHART
+    const salesPerClient = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
+    { $unwind: '$SourceDocuments.SalesInvoices.Invoice' },
+    {
+        $group: {
+            '_id': '$SourceDocuments.SalesInvoices.Invoice.CustomerID',
+            'clientPurchases': { $sum: 1 }
+        }
+    },
+    { $sort: { '_id': -1 } }
+    ]).catch(next)
+
+    const client = await saft.aggregate([
+        { $unwind: '$MasterFiles.Customer' },
+        {
+            $project: {
+                'MasterFiles.Customer.CompanyName': 1,
+                'MasterFiles.Customer.CustomerID': 1
+            }
+        },
+        { $sort: { '_id': -1 } }
+    ]).catch(next);
+
+    let customer = [], percent = [], totalCount, countPercentage;
+
+    for (i in salesPerClient) {
+        totalCount += salesPerClient[i].clientPurchases;
+    }
+
+    for (data in client) {
+        for (i in salesPerClient)
+        if (client[data].MasterFiles.Customer.CustomerID == salesPerClient[i]._id) {
+            customer.push(`"${client.CompanyName}"`)
+            countPercentage = (salesPerClient[i].clientPurchases / totalCount) * 100;
+            percent.push( (Math.round(countPercentage * 100) / 100).toFixed(1) )
+        }
+    }
+
     res.json({
         cities,
-        count
+        count,
+        customer,
+        percent
     })
-
 }
 
 //Get expenditure by costumer
-const getSales = async (req, res, next) => {
+const getTableCustomer = async (req, res, next) => {
     const salesPerClient = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
     { $unwind: '$SourceDocuments.SalesInvoices.Invoice' },
     {
@@ -162,13 +213,6 @@ const getSales = async (req, res, next) => {
     },
     { $sort: { '_id': -1 } }
     ]).catch(next)
-
-    let clientSales = []
-    let clientTotal;
-    let clientAverage;
-    let clientCount;
-    let clientTaxID;
-    let clientName;
 
     /*clientID = salesPerClient[data]._id;
     console.log(clientID) */
@@ -186,6 +230,7 @@ const getSales = async (req, res, next) => {
 
     // const stringified = JSON.stringify(client);
     // const obj = JSON.parse(stringified);
+    let clientSales = [], clientTotal, clientAverage, clientTaxID, clientName;
     for (data in client) {
         for (i in salesPerClient)
         if (client[data].MasterFiles.Customer.CustomerID == salesPerClient[i]._id) {
@@ -193,49 +238,41 @@ const getSales = async (req, res, next) => {
             clientName = client[data].MasterFiles.Customer.CompanyName;
             clientTotal = salesPerClient[i].ClientTotal;
             clientAverage = salesPerClient[i].ClientAverage;
-            clientCount = salesPerClient[i].clientCount;
-            clientSales.push({ clientTaxID, clientName, clientTotal, clientAverage, clientCount })
+            clientSales.push({ clientTaxID, clientName, clientTotal, clientAverage })
         }
     }
 
     res.json(
         clientSales
     );
-
 }
 
-const getProducts = async (req, res, next) => {
-    const productsJson = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
-    { $unwind: '$MasterFiles.Product' },
-    {
-        $project: {
-            'MasterFiles.Product.ProductCode': 1,
-            'MasterFiles.Product.ProductDescription': 1,
-            'MasterFiles.Product.ProductGroup': 1
-        }
-    }
+// ## DEPRECATED
+// const getProducts = async (req, res, next) => {
+//     const productsJson = await saft.aggregate([
+//     { $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
+//     { $unwind: '$MasterFiles.Product' },
+//     { $project: {
+//             'MasterFiles.Product.ProductCode': 1,
+//             'MasterFiles.Product.ProductDescription': 1,
+//             'MasterFiles.Product.ProductGroup': 1
+//     }}]).catch(next)
+//     // const stringified = JSON.stringify(productsJson);
+//     // const obj = JSON.parse(stringified);
+//     let products = []
+//     let ProductCode
+//     let ProductDescription
+//     let ProductGroup
+//     for (i in productsJson) {
+//         ProductCode = productsJson[i].MasterFiles.Product.ProductCode;
+//         ProductDescription = productsJson[i].MasterFiles.Product.ProductDescription;
+//         ProductGroup = productsJson[i].MasterFiles.Product.ProductGroup;
+//         products.push({ ProductCode, ProductDescription, ProductGroup })
+//     }
+//     res.json(products)
+// }
 
-    ]).catch(next)
-
-    // const stringified = JSON.stringify(productsJson);
-    // const obj = JSON.parse(stringified);
-
-    let products = []
-    let ProductCode
-    let ProductDescription
-    let ProductGroup
-    for (i in productsJson) {
-        ProductCode = productsJson[i].MasterFiles.Product.ProductCode;
-        ProductDescription = productsJson[i].MasterFiles.Product.ProductDescription;
-        ProductGroup = productsJson[i].MasterFiles.Product.ProductGroup;
-        products.push({ ProductCode, ProductDescription, ProductGroup })
-    }
-
-    res.json(products)
-
-}
-
-const getProductSales = async (req, res, next) => {
+const getTableProductSales = async (req, res, next) => {
     const salesPerProduct = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
     { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice' } },
     { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice.Line' } },
@@ -261,7 +298,7 @@ const getProductSales = async (req, res, next) => {
     for (i in salesPerProduct) {
         productDesc = salesPerProduct[i].ProductDesc[0];
         productTotal = salesPerProduct[i].ProductTotal;
-        productAverage = salesPerProduct[i].ProductAverage;
+        productAverage = (Math.round(salesPerProduct[i].ProductAverage * 100) / 100).toFixed(2);
         productCount = salesPerProduct[i].productCount;
         products.push({ productDesc, productTotal, productAverage, productCount })
     }
@@ -272,7 +309,7 @@ const getProductSales = async (req, res, next) => {
 
 }
 
-const getGroupSales = async (req, res, next) => {
+const getPieChartProductGroupSales = async (req, res, next) => {
     const salesPerProduct = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
     { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice' } },
     { $unwind: { "path": '$SourceDocuments.SalesInvoices.Invoice.Line' } },
@@ -341,58 +378,18 @@ const getGroupSales = async (req, res, next) => {
     });
 }
 
-const getValues = async (req, res, next) => {
-    const movimentsInfo = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
-    {
-        $project: {
-            'SourceDocuments.SalesInvoices.NumberOfEntries': 1,
-            'SourceDocuments.SalesInvoices.TotalCredit': 1,
-            'GeneralLedgerEntries.NumberOfEntries': 1,
-            'GeneralLedgerEntries.TotalCredit': 1
-        }
-    }
-    ]).catch(next)
+//Search for a Client/Customer using its ID
+const getClientInfo = async (req, res, next) => {
+    const clientInfo = await saft.find({ 'Header.FiscalYear': +req.body.FiscalYear, 'MasterFiles.Customer.CustomerTaxID': req.params.id },
+        { 'MasterFiles.Customer.$': 1 }).catch(next);
+    res.json(clientInfo)
+}
 
-    //Retorna o total de Compras(index 1) e Vendas (index 0)
-    const jsonTotalSalesAndPurchases = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
-    { $unwind: '$GeneralLedgerEntries.Journal' },
-    { $unwind: '$GeneralLedgerEntries.Journal.Transaction' },
-    { $unwind: '$GeneralLedgerEntries.Journal.Transaction.Lines.CreditLine' },
-    {
-        $group: {
-            '_id': '$GeneralLedgerEntries.Journal.Description',
-            'Total': { $sum: '$GeneralLedgerEntries.Journal.Transaction.Lines.CreditLine.CreditAmount' },
-        }
-    },
-    { $sort: { _id: 1 } }
-    ]).catch(next)
-
-    if ((movimentsInfo && movimentsInfo.length > 0) && 
-        (jsonTotalSalesAndPurchases && jsonTotalSalesAndPurchases.length > 0)) {
-
-        // const stringified = JSON.stringify(movimentsInfo);
-        // const obj = JSON.parse(stringified);
-        const TotalEntries = movimentsInfo[0].GeneralLedgerEntries.NumberOfEntries;
-        const TotalCredit = movimentsInfo[0].GeneralLedgerEntries.TotalCredit;
-        const NumberOfSales = movimentsInfo[0].SourceDocuments.SalesInvoices.NumberOfEntries;
-        const SalesValue = movimentsInfo[0].SourceDocuments.SalesInvoices.TotalCredit;
-
-        // const stringifiedTotals = JSON.stringify(jsonTotalSalesAndPurchases);
-        // const obj2 = JSON.parse(stringifiedTotals);
-        const totalCompras = jsonTotalSalesAndPurchases[0].Total;
-        const totalVendas = jsonTotalSalesAndPurchases[1].Total;
-
-        res.json({
-            TotalEntries: TotalEntries,
-            TotalCredit: TotalCredit,
-            NumberOfSales: NumberOfSales,
-            SalesValue: SalesValue,
-            totalCompras: totalCompras,
-            totalVendas: totalVendas
-        })
-    } else {
-        next({ message: `No Transaction Movements data was found for the requested ${ req.body.FiscalYear } Fiscal Year!`, status: 404 })
-    }
+//Search for a Supplier using its ID
+const getSupplierInfo = async (req, res, next) => {
+    const requestInfo = await saft.find({ 'Header.FiscalYear': +req.body.FiscalYear, 'MasterFiles.Supplier.SupplierID': req.params.id },
+        { 'MasterFiles.Supplier.$': 1 }).catch(next);
+    res.json(requestInfo)
 }
 
 //Search for a product using its ID
@@ -402,18 +399,45 @@ const getProductInfo = async (req, res, next) => {
     res.json(productInfo);
 }
 
+const getCompanyInfo = async (req, res) => {
+    const companyInfo = await saft.find({ 'AuditFile.Header.FiscalYear': +req.body.FiscalYear },
+        { '$project': { 'info': AuditFile.Header } })
+}
+
+const getJSON = async (req, res, next) => {
+    /*const found = await saft.find().exec((err, collection) => {
+        if (err) {
+            console.log('Error:', err);
+        } else {
+            res.json(collection);
+        }
+    }); */
+
+    const found = await saft.find().catch(next);
+
+    if (found) {
+        res.json(found)
+    } else {
+        console.log("Is null");
+    }
+};
+
 module.exports = {
-    getCompanyInfo,
-    getInfo,
-    getJSON,
+    // HOME
+    getKpiInfo,
+    getDiagramInvoices,
+    getTableInvoices,
+    // CLIENT
+    getPieChartCustomer,
+    getTableCustomer,
+    // PRODUCT
+    // getProducts, # DEPRECATED
+    getTableProductSales,
+    getPieChartProductGroupSales,
+    // MISC
     getClientInfo,
     getSupplierInfo,
-    getInvoices,
-    getSales,
     getProductInfo,
-    getValues,
-    getClientLocations,
-    getProductSales,
-    getProducts,
-    getGroupSales
+    getCompanyInfo,
+    getJSON
 }
