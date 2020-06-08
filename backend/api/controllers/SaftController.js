@@ -110,23 +110,38 @@ const getTableInvoices = async (req, res, next) => {
     }
     ]).catch(next)
 
+    const customers = await saft.aggregate([
+        { $unwind: '$MasterFiles.Customer' },
+        {
+            $project: {
+                'MasterFiles.Customer.CompanyName': 1,
+                'MasterFiles.Customer.CustomerID': 1
+            }
+        },
+        { $sort: { '_id': -1 } }
+    ]).catch(next);
+
     // # Organizar os dados depois de efetuada a Query (remover os embeded documents)
     if (invoices && invoices.length > 0) {
         // const stringified = JSON.stringify(invoices);
         // const obj = JSON.parse(stringified);
         let invoiceInfo = []
 
-        let InvoiceNo, InvoiceDate, CustomerID, GrossTotal, NetTotal, TaxTotal;
+        let InvoiceNo, InvoiceDate, CustomerID, CompanyName, GrossTotal, NetTotal, TaxTotal;
         const NumberOfEntries = invoices[0].SourceDocuments.SalesInvoices.NumberOfEntries;
         // console.log(invoices[0])
+
         for (let i = 0; i < NumberOfEntries; i++) {
+            tempCustomer = customers.find( elem => elem.MasterFiles.Customer.CustomerID === invoices[i].SourceDocuments.SalesInvoices.Invoice.CustomerID);
+            CompanyName = tempCustomer.MasterFiles.Customer.CompanyName;
+            CustomerID = tempCustomer.MasterFiles.Customer.CustomerID;
+
             InvoiceNo = invoices[i].SourceDocuments.SalesInvoices.Invoice.InvoiceNo;
             InvoiceDate = invoices[i].SourceDocuments.SalesInvoices.Invoice.InvoiceDate;
-            CustomerID = invoices[i].SourceDocuments.SalesInvoices.Invoice.CustomerID;
             GrossTotal = invoices[i].SourceDocuments.SalesInvoices.Invoice.DocumentTotals.GrossTotal;
             NetTotal = invoices[i].SourceDocuments.SalesInvoices.Invoice.DocumentTotals.NetTotal;
             TaxTotal = (Math.round((GrossTotal - NetTotal) * 100) / 100).toFixed(2);
-            invoiceInfo.push({ InvoiceNo, InvoiceDate, CustomerID, GrossTotal, NetTotal, TaxTotal })
+            invoiceInfo.push({ InvoiceNo, InvoiceDate, CustomerID, CompanyName, GrossTotal, NetTotal, TaxTotal })
         }
         res.json(invoiceInfo)
     } else {
@@ -173,7 +188,7 @@ const getPieChartCustomer = async (req, res, next) => {
                 'MasterFiles.Customer.CustomerID': 1
             }
         },
-        { $sort: { '_id': -1 } }
+        { $sort: { 'MasterFiles.Customer.CustomerID': -1 } }
     ]).catch(next);
 
     let customer = [], percent = [], totalCount = 0, countPercentage = 0;
@@ -188,6 +203,7 @@ const getPieChartCustomer = async (req, res, next) => {
             customer.push(`"${client[data].MasterFiles.Customer.CompanyName}"`)
             countPercentage = (salesPerClient[i].clientPurchases / totalCount) * 100;
             percent.push( +(Math.round(countPercentage * 100) / 100).toFixed(1) )
+            break;
         }
     }
 
@@ -239,6 +255,7 @@ const getTableCustomer = async (req, res, next) => {
             clientTotal = salesPerClient[i].ClientTotal;
             clientAverage = salesPerClient[i].ClientAverage;
             clientSales.push({ clientTaxID, clientName, clientTotal, clientAverage })
+            break;
         }
     }
 
@@ -306,7 +323,6 @@ const getTableProductSales = async (req, res, next) => {
     res.json(
         products
     );
-
 }
 
 const getPieChartProductGroupSales = async (req, res, next) => {

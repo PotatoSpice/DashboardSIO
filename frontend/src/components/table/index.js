@@ -59,7 +59,7 @@ export default function TableTest() {
                   {row.InvoiceNo}
                 </TableCell>
                 <TableCell align="right">{row.InvoiceDate}</TableCell>
-                <TableCell align="right">{row.CustomerID}</TableCell>
+                <TableCell align="right">{row.CompanyName} | {row.CustomerID}</TableCell>
                 <TableCell align="right">{row.GrossTotal}</TableCell>
                 <TableCell align="right">{row.NetTotal}</TableCell>
                 <TableCell align="right">{row.TaxTotal}</TableCell>
