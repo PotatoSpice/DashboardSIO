@@ -75,7 +75,7 @@ const uploadParseSaft = function (req, res, next) {
 
         // # Ler o ficheiro SAF-T recebido pelo 'multer'
         console.log('# READ: reading received XML SAF-T ...');
-        fs.readFile(file_path, function(err, xmlSaft) { // CB
+        fs.readFile(file_path, 'binary', function(err, xmlSaft) { // CB
             if (err) {
                 next({ message: err.message, status: err.status })
                 deleteTempFile(file_path)
