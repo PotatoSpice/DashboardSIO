@@ -29,11 +29,7 @@ function header() {
                   Product
                 </Link>
               </li>
-              <li>
-                <Link className="back-link" to="/sales">
-                  Sales
-                </Link>
-              </li>
+
               <li>
                 <Link className="back-link" to="/saft">
                   Saft

@@ -87,38 +87,38 @@ export default function Dasboard() {
       </h1>
       <div className="kpis">
         <Cardtext
-          icon={"https://img.icons8.com/ios/64/000000/list.png"}
-          text={"Total Entries:"}
-          resolte={TotalEntries}
-        />
-        <Cardtext
-          icon={
-            "https://img.icons8.com/android/24/000000/bank-card-back-side.png"
-          }
-          text={"Total Credit:"}
-          resolte={TotalCredit}
-        />
-        <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/sales-performance.png"}
-          text={"Number Of Sales:"}
+          text={"Number Of Sales"}
           resolte={NumberOfSales}
         />
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/sales-performance.png"}
-          text={"Sales Value:"}
-          resolte={SalesValue}
+          text={"Net Sales Value:"}
+          resolte={SalesValue + "€"}
         />
         <Cardtext
           icon={"https://img.icons8.com/carbon-copy/100/000000/total-sales.png"}
           text={"Total Sales:"}
-          resolte={totalVendas}
+          resolte={totalVendas + "€"}
         />
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/shop.png"}
-          text={"Total Compras:"}
-          resolte={totalCompras}
+          text={"Number of purchase: "}
+          resolte={TotalEntries - NumberOfSales}
+        />
+        <Cardtext
+          icon={"https://img.icons8.com/wired/64/000000/shop.png"}
+          text={"Total of purchase: "}
+          resolte={totalCompras + "€"}
+        />
+
+        <Cardtext
+          icon={"https://img.icons8.com/wired/64/000000/shop.png"}
+          text={"Total of profit: "}
+          resolte={SalesValue - totalCompras + "€"}
         />
       </div>
+
       <div className="invoices">
         <DoubleLine
           labels={monthsInvoice}
@@ -128,6 +128,7 @@ export default function Dasboard() {
           name2={"Total Average Invoices"}
           alt={"Invoices"}
         />
+        <h2>€ per month</h2>
       </div>
 
       <h1 className="titleI">

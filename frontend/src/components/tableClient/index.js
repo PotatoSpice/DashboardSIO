@@ -48,8 +48,6 @@ export default function TableClient() {
               <TableCell>Client Tax Id</TableCell>
               <TableCell align="right">Name</TableCell>
               <TableCell align="right">Total</TableCell>
-              <TableCell align="right">Average</TableCell>
-              <TableCell align="right">Count</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -60,8 +58,6 @@ export default function TableClient() {
                 </TableCell>
                 <TableCell align="right">{row.clientName}</TableCell>
                 <TableCell align="right">{row.clientTotal}</TableCell>
-                <TableCell align="right">{row.clientAverage}</TableCell>
-                <TableCell align="right">{row.clientCount}</TableCell>
               </TableRow>
             ))}
           </TableBody>
