@@ -18,6 +18,7 @@ function Header() {
           src="https://img.icons8.com/cotton/64/000000/card-wallet.png"
           alt="logo"
         />
+        <h1 class="year">Fiscal Year:{year}</h1>
         <div className="menu-section">
           <nav>
             <ul>
@@ -35,9 +36,6 @@ function Header() {
                 <Link className="back-link" to="/product">
                   Product
                 </Link>
-              </li>
-              <li>
-                <h1>{year}</h1>
               </li>
               <li>
                 <Link className="back-link" to="/saft">
