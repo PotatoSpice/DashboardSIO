@@ -101,7 +101,7 @@ export default function Dasboard() {
           text={"Total Gained on Sales:"}
           resolte={totalVendas + "€"}
         />
-        <br/>
+
         <Cardtext
           icon={"https://img.icons8.com/wired/64/000000/shop.png"}
           text={"Number of Purchases: "}
