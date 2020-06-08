@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import "./styles.css";
 
-function header() {
+function Header() {
+  const [year, setYear] = useState(0);
+
+  useEffect(() => {
+    let ano = localStorage.getItem("year");
+    setYear(+ano);
+    console.log(+ano);
+  }, [year]);
   return (
     <header>
       <div className="container">
@@ -29,7 +36,9 @@ function header() {
                   Product
                 </Link>
               </li>
-
+              <li>
+                <h1>{year}</h1>
+              </li>
               <li>
                 <Link className="back-link" to="/saft">
                   Saft
@@ -43,4 +52,4 @@ function header() {
   );
 }
 
-export default header;
+export default Header;
