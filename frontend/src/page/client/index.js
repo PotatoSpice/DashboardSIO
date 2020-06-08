@@ -14,7 +14,7 @@ function Client() {
   const [count, setCount] = useState("");
 
   async function pieProduct() {
-    const response = await api.post("/saft/locations", {
+    const response = await api.post("/saft/customers", {
       FiscalYear: year,
     });
 
