@@ -48,7 +48,7 @@ export default function TableClient() {
               <TableCell>Product</TableCell>
               <TableCell align="right">Total sold value (€)</TableCell>
               <TableCell align="right">Average sold value (€)</TableCell>
-              <TableCell align="right">Count</TableCell>
+              <TableCell align="right">Total Amount Sold</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

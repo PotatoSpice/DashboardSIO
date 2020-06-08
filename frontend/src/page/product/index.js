@@ -37,7 +37,7 @@ export default function Product() {
     <div>
       <Header />
       <h1 className="title">
-        Product
+        Product Groups
         <img
           className="iconD"
           src="https://img.icons8.com/pastel-glyph/64/000000/product.png"
@@ -53,6 +53,13 @@ export default function Product() {
           <Pie labels={name} data={count} alt={"Pie"} />
         </div>
       </div>
+      <h1 className="title">
+        Product
+        <img
+          className="iconD"
+          src="https://img.icons8.com/pastel-glyph/64/000000/product.png"
+        />
+      </h1>
       <Table />
     </div>
   );
