@@ -142,11 +142,6 @@ const uploadParseSaft = function (req, res, next) {
     }
 }
 
-module.exports = {
-    uploadParseSaft
-}
-
-// ## DEPRECATED
 // # Versão em Promises do upload do ficheiro. Não se realiza a validação do XML pelo XSD Schema!
 const uploadParseSaftPromise = async (req, res, next) => {
     if (!req.file) {
@@ -158,7 +153,7 @@ const uploadParseSaftPromise = async (req, res, next) => {
     } else {
         // # Ler o ficheiro SAF-T recebido pelo 'multer'
         console.log('# READ: reading received XML SAF-T ...');
-        const xmlSaft = await fsp.readFile(req.file.path).catch(next);
+        const xmlSaft = await fsp.readFile(req.file.path, 'binary').catch(next);
         console.log('- success -');
 
         // # Validar SAF-T XML com XSD e Parse para JSON
@@ -211,4 +206,9 @@ const uploadParseSaftPromise = async (req, res, next) => {
             console.log('- success -');
         }
     }
+}
+
+module.exports = {
+    uploadParseSaft,
+    uploadParseSaftPromise
 }
