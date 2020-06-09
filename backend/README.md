@@ -19,6 +19,17 @@ A estrutura do SAF-T pode ser vista nos links seguintes:
 
 ### SETUP
 
+Antes de mais deverá verificar se a variáveis de ambiente JAVA_HOME e Path estão definidas com o path para a diretoria e a pasta 'bin/' do JDK, respetivamente.
+
+```
+$ JAVA_HOME = path_to_jdk_directory (ex.: C:\Program Files\Java\jdk_1.8.0_152)
+```
+```
+$ Path = path_to_jdk_bin_directory (ex.: ...;C:\Program Files\Java\jdk_1.8.0_152\bin;...)
+```
+
+*sem a devida configuração do Java, não será possível validar o SAF-T PT com o respetivo Schema*
+
 Deverá ser aberta uma consola do sistema na *root directory* do projeto e executadas as seguintes linhas.
 
 - Instalar todas as dependências
