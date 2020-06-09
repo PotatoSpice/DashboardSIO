@@ -344,11 +344,10 @@ const getPieChartProductGroupSales = async (req, res, next) => {
     let productCount = [];
 
     for (i in salesPerProduct) {
-
         products.push({ 'ID': salesPerProduct[i]._id });
         productTotal.push(salesPerProduct[i].ProductTotal);
         productCount.push(salesPerProduct[i].productCount);
-        console.log(products[i])
+        // console.log(products[i])
     }
 
     const groups = await saft.aggregate([{ $match: { 'Header.FiscalYear': +req.body.FiscalYear } },
@@ -365,7 +364,7 @@ const getPieChartProductGroupSales = async (req, res, next) => {
     let groupName = [];
     let groupTotal = [];
     let groupCount = [];
-    let pindex;
+    let pindex, product;
 
     for (i in groups) {
         groupTotal[i] = 0;
@@ -384,6 +383,14 @@ const getPieChartProductGroupSales = async (req, res, next) => {
                     groupCount[i] += productCount[pindex];
                 }
             }
+        }
+    }
+
+    for (let i = 0; i < groupName.length; i++) {
+        if (groupCount[i] === 0) {
+            groupName.splice(i, 1);
+            groupCount.splice(i, 1);
+            groupTotal.splice(i, 1);
         }
     }
 
