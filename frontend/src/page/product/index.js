@@ -45,7 +45,7 @@ export default function Product() {
       </h1>
       <div className="pies">
         <div className="pie">
-          <h2>Sales value by Product Group</h2>
+          <h2>Sales value by Product Group (€)</h2>
           <Pie labels={name} data={total} alt={"Pie"} />
         </div>
         <div className="pie">
